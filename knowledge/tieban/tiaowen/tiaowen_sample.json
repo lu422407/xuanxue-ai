@@ -1,0 +1,169 @@
+[
+  {
+    "id": "TB-0001",
+    "ke": 0,
+    "fen": 0,
+    "category": "父母",
+    "text": "父生肖龙，母生肖蛇，父母康宁，早年得荫。",
+    "father_zodiac": "龙",
+    "mother_zodiac": "蛇",
+    "siblings": "3",
+    "self_rank": "2",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["父母", "属相", "示例"],
+      "note": "仅用于演示考刻定分 + 直接检索两条路径的数据结构"
+    }
+  },
+  {
+    "id": "TB-0002",
+    "ke": 1,
+    "fen": 3,
+    "category": "父母",
+    "text": "父生肖猴，母生肖虎，父母性情刚柔相济。",
+    "father_zodiac": "猴",
+    "mother_zodiac": "虎",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["父母", "属相", "示例"]
+    }
+  },
+  {
+    "id": "TB-0003",
+    "ke": 2,
+    "fen": 1,
+    "category": "兄弟",
+    "text": "兄弟三人，本人居次，手足互助。",
+    "siblings": "3",
+    "self_rank": "2",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["兄弟", "排行", "示例"]
+    }
+  },
+  {
+    "id": "TB-0004",
+    "ke": 3,
+    "fen": 5,
+    "category": "夫妻",
+    "text": "配偶生肖马，夫妻和顺，中年后情浓。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["夫妻", "示例"]
+    }
+  },
+  {
+    "id": "TB-0005",
+    "ke": 4,
+    "fen": 2,
+    "category": "子女",
+    "text": "子女两位，一男一女，晚景有靠。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["子女", "示例"]
+    }
+  },
+  {
+    "id": "TB-0006",
+    "ke": 0,
+    "fen": 7,
+    "category": "自身",
+    "text": "命主心性聪慧，初年平平，中年发越。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["自身", "性格", "示例"]
+    }
+  },
+  {
+    "id": "TB-0007",
+    "ke": 5,
+    "fen": 4,
+    "category": "自身",
+    "text": "命主宜静不宜动，守成则安，妄进多蹶。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["自身", "示例"]
+    }
+  },
+  {
+    "id": "TB-0008",
+    "ke": 6,
+    "fen": 6,
+    "category": "流年",
+    "text": "逢龙年、狗年宜谨慎守财，余岁平顺。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["流年", "示例"]
+    }
+  },
+  {
+    "id": "TB-0009",
+    "ke": 7,
+    "fen": 9,
+    "category": "其他",
+    "text": "宅运东南向吉，迁移宜择水近之地。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["其他", "风水", "示例"]
+    }
+  },
+  {
+    "id": "TB-0010",
+    "ke": 2,
+    "fen": 8,
+    "category": "父母",
+    "text": "父母寿考，父严于教，母慈于养。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["父母", "示例"]
+    }
+  },
+  {
+    "id": "TB-0011",
+    "ke": 3,
+    "fen": 0,
+    "category": "兄弟",
+    "text": "兄弟五人，本人居三，长兄如父。",
+    "siblings": "5",
+    "self_rank": "3",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["兄弟", "排行", "示例"]
+    }
+  },
+  {
+    "id": "TB-0012",
+    "ke": 4,
+    "fen": 9,
+    "category": "子女",
+    "text": "子女迟得，得则聪颖，宜善教养。",
+    "meta": {
+      "source": "示例占位（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["子女", "示例"]
+    }
+  }
+]
