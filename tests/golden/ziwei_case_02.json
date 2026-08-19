@@ -1,0 +1,220 @@
+{
+  "system": "ziwei",
+  "input": {
+    "birth_datetime": "1990-05-01 08:30:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "女"
+  },
+  "expected": {
+    "system": "ziwei",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "1990-05-01 08:30:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "school": "zhongzhou",
+      "gender": "女",
+      "lunar": {
+        "lunar_year": 1990,
+        "lunar_month": 4,
+        "lunar_day": 7,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      },
+      "lunar_date": "一九九〇年四月初七",
+      "chinese_date": "庚午 庚辰 丙寅 壬辰"
+    },
+    "soul": {
+      "star": "巨门",
+      "palace": "丑"
+    },
+    "body": {
+      "star": "火星",
+      "palace": "酉"
+    },
+    "palaces": {
+      "父母": {
+        "position": "寅",
+        "major_stars": [
+          "廉贞"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "天厨",
+          "天月",
+          "蜚廉"
+        ],
+        "mutagen": null
+      },
+      "福德": {
+        "position": "卯",
+        "major_stars": [],
+        "minor_stars": [
+          "地劫"
+        ],
+        "adopted_stars": [
+          "天喜",
+          "咸池",
+          "天寿",
+          "天德"
+        ],
+        "mutagen": null
+      },
+      "田宅": {
+        "position": "辰",
+        "major_stars": [
+          "破军"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "天姚",
+          "凤阁",
+          "寡宿",
+          "年解"
+        ],
+        "mutagen": null
+      },
+      "官禄": {
+        "position": "巳",
+        "major_stars": [
+          "天同"
+        ],
+        "minor_stars": [
+          "火星"
+        ],
+        "adopted_stars": [
+          "破碎"
+        ],
+        "mutagen": null
+      },
+      "仆役": {
+        "position": "午",
+        "major_stars": [
+          "武曲",
+          "天府"
+        ],
+        "minor_stars": [
+          "文昌"
+        ],
+        "adopted_stars": [
+          "封诰",
+          "天福",
+          "截路",
+          "天伤"
+        ],
+        "mutagen": null
+      },
+      "迁移": {
+        "position": "未",
+        "major_stars": [
+          "太阳",
+          "太阴"
+        ],
+        "minor_stars": [
+          "左辅",
+          "右弼",
+          "天钺",
+          "地空",
+          "铃星",
+          "陀罗"
+        ],
+        "adopted_stars": [
+          "天才",
+          "天空",
+          "空亡"
+        ],
+        "mutagen": null
+      },
+      "疾厄": {
+        "position": "申",
+        "major_stars": [
+          "贪狼"
+        ],
+        "minor_stars": [
+          "文曲",
+          "禄存",
+          "天马"
+        ],
+        "adopted_stars": [
+          "孤辰",
+          "阴煞",
+          "天使"
+        ],
+        "mutagen": null
+      },
+      "财帛": {
+        "position": "酉",
+        "major_stars": [
+          "天机",
+          "巨门"
+        ],
+        "minor_stars": [
+          "擎羊"
+        ],
+        "adopted_stars": [
+          "红鸾"
+        ],
+        "mutagen": null
+      },
+      "子女": {
+        "position": "戌",
+        "major_stars": [
+          "紫微",
+          "天相"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "解神",
+          "龙池",
+          "台辅",
+          "华盖",
+          "旬空"
+        ],
+        "mutagen": null
+      },
+      "夫妻": {
+        "position": "亥",
+        "major_stars": [
+          "天梁"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "恩光",
+          "天巫",
+          "天官",
+          "月德"
+        ],
+        "mutagen": null
+      },
+      "兄弟": {
+        "position": "子",
+        "major_stars": [
+          "七杀"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "天刑",
+          "天哭",
+          "天虚"
+        ],
+        "mutagen": null
+      },
+      "命宫": {
+        "position": "丑",
+        "major_stars": [],
+        "minor_stars": [
+          "天魁"
+        ],
+        "adopted_stars": [
+          "三台",
+          "八座",
+          "天贵"
+        ],
+        "mutagen": null
+      }
+    }
+  }
+}

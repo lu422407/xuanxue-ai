@@ -1,0 +1,132 @@
+{
+  "system": "bazi",
+  "input": {
+    "birth_datetime": "1990-04-07 08:30:00",
+    "timezone_offset": 8,
+    "calendar": "lunar",
+    "gender": "男"
+  },
+  "expected": {
+    "system": "bazi",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "1990-04-07 08:30:00",
+      "calendar": "lunar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "bazi_subhour_rule": "midnight",
+      "lunar": {
+        "lunar_year": 1990,
+        "lunar_month": 4,
+        "lunar_day": 7,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      }
+    },
+    "day_master": {
+      "stem": "丙",
+      "element": "火"
+    },
+    "pillars": {
+      "year": {
+        "stem": "庚",
+        "branch": "午",
+        "stem_index": 6,
+        "branch_index": 6,
+        "ten_god": "偏财",
+        "hidden_stems": [
+          {
+            "stem": "丁",
+            "index": 3,
+            "ten_god": "劫财"
+          },
+          {
+            "stem": "己",
+            "index": 5,
+            "ten_god": "伤官"
+          }
+        ]
+      },
+      "month": {
+        "stem": "庚",
+        "branch": "辰",
+        "stem_index": 6,
+        "branch_index": 4,
+        "ten_god": "偏财",
+        "hidden_stems": [
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "食神"
+          },
+          {
+            "stem": "乙",
+            "index": 1,
+            "ten_god": "正印"
+          },
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正官"
+          }
+        ]
+      },
+      "day": {
+        "stem": "丙",
+        "branch": "寅",
+        "stem_index": 2,
+        "branch_index": 2,
+        "ten_god": "日主",
+        "hidden_stems": [
+          {
+            "stem": "甲",
+            "index": 0,
+            "ten_god": "偏印"
+          },
+          {
+            "stem": "丙",
+            "index": 2,
+            "ten_god": "比肩"
+          },
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "食神"
+          }
+        ]
+      },
+      "hour": {
+        "stem": "壬",
+        "branch": "辰",
+        "stem_index": 8,
+        "branch_index": 4,
+        "ten_god": "七杀",
+        "hidden_stems": [
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "食神"
+          },
+          {
+            "stem": "乙",
+            "index": 1,
+            "ten_god": "正印"
+          },
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正官"
+          }
+        ]
+      }
+    },
+    "wuxing": {
+      "木": 1,
+      "火": 2,
+      "土": 2,
+      "金": 2,
+      "水": 1
+    }
+  }
+}

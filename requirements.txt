@@ -1,0 +1,26 @@
+# 术数 AI Engine Pro v3.2 依赖（锁定版本号，禁止漂移）
+# 历法/天文计算（寿星天文历，覆盖公元前3000年~公元3000年）
+sxtwl==2.0.7
+# 紫微斗数排盘（py-iztro 0.1.5，中州派，内嵌 iztro-2.5.0 JS 引擎）
+py-iztro==0.1.5
+# Web 框架 / API
+fastapi==0.141.1
+uvicorn==0.52.3
+pydantic==2.10.6
+# 数据库
+sqlalchemy==2.0.52
+psycopg2-binary==2.9.12
+cryptography==50.0.0
+# LLM SDK
+openai==3.3.0
+# 向量检索
+numpy==2.4.6
+# 测试
+pytest==9.1.1
+httpx==0.28.1
+# 大六壬（dalurenpython 子模块依赖）
+eacal==0.0.3
+regex==2026.7.19
+prettytable==3.18.0
+# ganzhiwuxin 不在 PyPI，需从 git 安装:
+# pip install git+https://github.com/wlhyl/ganzhiwuxinForPython.git

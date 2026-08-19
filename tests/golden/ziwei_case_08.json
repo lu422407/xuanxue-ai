@@ -1,0 +1,220 @@
+{
+  "system": "ziwei",
+  "input": {
+    "birth_datetime": "2005-12-31 23:30:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "男"
+  },
+  "expected": {
+    "system": "ziwei",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "2005-12-31 23:30:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "school": "zhongzhou",
+      "gender": "男",
+      "lunar": {
+        "lunar_year": 2005,
+        "lunar_month": 12,
+        "lunar_day": 1,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      },
+      "lunar_date": "二〇〇五年腊月初一",
+      "chinese_date": "乙酉 戊子 庚寅 丙子"
+    },
+    "soul": {
+      "star": "巨门",
+      "palace": "丑"
+    },
+    "body": {
+      "star": "天同",
+      "palace": "丑"
+    },
+    "palaces": {
+      "父母": {
+        "position": "寅",
+        "major_stars": [
+          "武曲",
+          "天相"
+        ],
+        "minor_stars": [
+          "陀罗"
+        ],
+        "adopted_stars": [
+          "封诰",
+          "天月",
+          "月德"
+        ],
+        "mutagen": null
+      },
+      "福德": {
+        "position": "卯",
+        "major_stars": [
+          "太阳",
+          "天梁"
+        ],
+        "minor_stars": [
+          "左辅",
+          "禄存",
+          "火星"
+        ],
+        "adopted_stars": [
+          "天虚"
+        ],
+        "mutagen": null
+      },
+      "田宅": {
+        "position": "辰",
+        "major_stars": [
+          "七杀"
+        ],
+        "minor_stars": [
+          "文曲",
+          "擎羊"
+        ],
+        "adopted_stars": [
+          "三台",
+          "天贵",
+          "天官",
+          "阴煞"
+        ],
+        "mutagen": null
+      },
+      "官禄": {
+        "position": "巳",
+        "major_stars": [
+          "天机"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "破碎"
+        ],
+        "mutagen": null
+      },
+      "仆役": {
+        "position": "午",
+        "major_stars": [
+          "紫微"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "红鸾",
+          "咸池",
+          "解神",
+          "台辅",
+          "天厨",
+          "天德",
+          "截路",
+          "天伤"
+        ],
+        "mutagen": null
+      },
+      "迁移": {
+        "position": "未",
+        "major_stars": [],
+        "minor_stars": [],
+        "adopted_stars": [
+          "旬空",
+          "空亡",
+          "寡宿"
+        ],
+        "mutagen": null
+      },
+      "疾厄": {
+        "position": "申",
+        "major_stars": [
+          "破军"
+        ],
+        "minor_stars": [
+          "天钺"
+        ],
+        "adopted_stars": [
+          "天福",
+          "天刑",
+          "天使"
+        ],
+        "mutagen": null
+      },
+      "财帛": {
+        "position": "酉",
+        "major_stars": [],
+        "minor_stars": [],
+        "adopted_stars": [
+          "天哭"
+        ],
+        "mutagen": null
+      },
+      "子女": {
+        "position": "戌",
+        "major_stars": [
+          "廉贞",
+          "天府"
+        ],
+        "minor_stars": [
+          "文昌",
+          "铃星"
+        ],
+        "adopted_stars": [
+          "八座",
+          "恩光",
+          "天才",
+          "天寿",
+          "天空"
+        ],
+        "mutagen": null
+      },
+      "夫妻": {
+        "position": "亥",
+        "major_stars": [
+          "太阴"
+        ],
+        "minor_stars": [
+          "右弼",
+          "天马",
+          "地空",
+          "地劫"
+        ],
+        "adopted_stars": [
+          "天巫",
+          "孤辰",
+          "蜚廉"
+        ],
+        "mutagen": null
+      },
+      "兄弟": {
+        "position": "子",
+        "major_stars": [
+          "贪狼"
+        ],
+        "minor_stars": [
+          "天魁"
+        ],
+        "adopted_stars": [
+          "天喜",
+          "天姚"
+        ],
+        "mutagen": null
+      },
+      "命宫": {
+        "position": "丑",
+        "major_stars": [
+          "天同",
+          "巨门"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "龙池",
+          "凤阁",
+          "华盖",
+          "年解"
+        ],
+        "mutagen": null
+      }
+    }
+  }
+}

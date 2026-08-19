@@ -1,0 +1,221 @@
+{
+  "system": "ziwei",
+  "input": {
+    "birth_datetime": "1988-08-08 20:30:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "男"
+  },
+  "expected": {
+    "system": "ziwei",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "1988-08-08 20:30:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "school": "zhongzhou",
+      "gender": "男",
+      "lunar": {
+        "lunar_year": 1988,
+        "lunar_month": 6,
+        "lunar_day": 26,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      },
+      "lunar_date": "一九八八年六月廿六",
+      "chinese_date": "戊辰 庚申 乙未 丙戌"
+    },
+    "soul": {
+      "star": "文曲",
+      "palace": "酉"
+    },
+    "body": {
+      "star": "文昌",
+      "palace": "巳"
+    },
+    "palaces": {
+      "仆役": {
+        "position": "寅",
+        "major_stars": [],
+        "minor_stars": [
+          "文曲",
+          "天马"
+        ],
+        "adopted_stars": [
+          "天贵",
+          "天刑",
+          "天哭",
+          "天伤"
+        ],
+        "mutagen": null
+      },
+      "迁移": {
+        "position": "卯",
+        "major_stars": [],
+        "minor_stars": [],
+        "adopted_stars": [
+          "天官",
+          "天福",
+          "天月"
+        ],
+        "mutagen": null
+      },
+      "疾厄": {
+        "position": "辰",
+        "major_stars": [
+          "天同"
+        ],
+        "minor_stars": [
+          "陀罗"
+        ],
+        "adopted_stars": [
+          "八座",
+          "台辅",
+          "华盖",
+          "阴煞",
+          "天使"
+        ],
+        "mutagen": null
+      },
+      "财帛": {
+        "position": "巳",
+        "major_stars": [
+          "武曲",
+          "破军"
+        ],
+        "minor_stars": [
+          "右弼",
+          "禄存"
+        ],
+        "adopted_stars": [
+          "天喜",
+          "天空",
+          "孤辰"
+        ],
+        "mutagen": null
+      },
+      "子女": {
+        "position": "午",
+        "major_stars": [
+          "太阳"
+        ],
+        "minor_stars": [
+          "擎羊"
+        ],
+        "adopted_stars": [
+          "天姚",
+          "凤阁",
+          "天厨",
+          "蜚廉",
+          "年解"
+        ],
+        "mutagen": null
+      },
+      "夫妻": {
+        "position": "未",
+        "major_stars": [
+          "天府"
+        ],
+        "minor_stars": [
+          "天钺"
+        ],
+        "adopted_stars": [],
+        "mutagen": null
+      },
+      "兄弟": {
+        "position": "申",
+        "major_stars": [
+          "天机",
+          "太阴"
+        ],
+        "minor_stars": [
+          "铃星"
+        ],
+        "adopted_stars": [
+          "龙池",
+          "天巫"
+        ],
+        "mutagen": null
+      },
+      "命宫": {
+        "position": "酉",
+        "major_stars": [
+          "紫微",
+          "贪狼"
+        ],
+        "minor_stars": [
+          "左辅",
+          "地劫"
+        ],
+        "adopted_stars": [
+          "咸池",
+          "天寿",
+          "月德"
+        ],
+        "mutagen": null
+      },
+      "父母": {
+        "position": "戌",
+        "major_stars": [
+          "巨门"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "三台",
+          "旬空",
+          "天虚"
+        ],
+        "mutagen": null
+      },
+      "福德": {
+        "position": "亥",
+        "major_stars": [
+          "天相"
+        ],
+        "minor_stars": [],
+        "adopted_stars": [
+          "红鸾"
+        ],
+        "mutagen": null
+      },
+      "田宅": {
+        "position": "子",
+        "major_stars": [
+          "天梁"
+        ],
+        "minor_stars": [
+          "文昌",
+          "火星"
+        ],
+        "adopted_stars": [
+          "解神",
+          "恩光",
+          "封诰",
+          "截路"
+        ],
+        "mutagen": null
+      },
+      "官禄": {
+        "position": "丑",
+        "major_stars": [
+          "廉贞",
+          "七杀"
+        ],
+        "minor_stars": [
+          "天魁",
+          "地空"
+        ],
+        "adopted_stars": [
+          "天才",
+          "天德",
+          "空亡",
+          "寡宿",
+          "破碎"
+        ],
+        "mutagen": null
+      }
+    }
+  }
+}

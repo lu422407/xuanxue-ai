@@ -1,0 +1,112 @@
+{
+  "system": "bazi",
+  "input": {
+    "birth_datetime": "2024-02-03 12:00:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "女"
+  },
+  "expected": {
+    "system": "bazi",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "2024-02-03 12:00:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "bazi_subhour_rule": "midnight",
+      "lunar": {
+        "lunar_year": 2023,
+        "lunar_month": 12,
+        "lunar_day": 24,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      }
+    },
+    "day_master": {
+      "stem": "丁",
+      "element": "火"
+    },
+    "pillars": {
+      "year": {
+        "stem": "癸",
+        "branch": "卯",
+        "stem_index": 9,
+        "branch_index": 3,
+        "ten_god": "七杀",
+        "hidden_stems": [
+          {
+            "stem": "乙",
+            "index": 1,
+            "ten_god": "偏印"
+          }
+        ]
+      },
+      "month": {
+        "stem": "乙",
+        "branch": "丑",
+        "stem_index": 1,
+        "branch_index": 1,
+        "ten_god": "偏印",
+        "hidden_stems": [
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "伤官"
+          },
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "七杀"
+          },
+          {
+            "stem": "辛",
+            "index": 7,
+            "ten_god": "偏财"
+          }
+        ]
+      },
+      "day": {
+        "stem": "丁",
+        "branch": "酉",
+        "stem_index": 3,
+        "branch_index": 9,
+        "ten_god": "日主",
+        "hidden_stems": [
+          {
+            "stem": "辛",
+            "index": 7,
+            "ten_god": "偏财"
+          }
+        ]
+      },
+      "hour": {
+        "stem": "丙",
+        "branch": "午",
+        "stem_index": 2,
+        "branch_index": 6,
+        "ten_god": "劫财",
+        "hidden_stems": [
+          {
+            "stem": "丁",
+            "index": 3,
+            "ten_god": "比肩"
+          },
+          {
+            "stem": "己",
+            "index": 5,
+            "ten_god": "食神"
+          }
+        ]
+      }
+    },
+    "wuxing": {
+      "木": 2,
+      "火": 3,
+      "土": 1,
+      "金": 1,
+      "水": 1
+    }
+  }
+}

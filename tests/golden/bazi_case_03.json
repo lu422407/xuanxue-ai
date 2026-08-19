@@ -1,0 +1,132 @@
+{
+  "system": "bazi",
+  "input": {
+    "birth_datetime": "2024-02-04 12:00:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "男"
+  },
+  "expected": {
+    "system": "bazi",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "2024-02-04 12:00:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "bazi_subhour_rule": "midnight",
+      "lunar": {
+        "lunar_year": 2023,
+        "lunar_month": 12,
+        "lunar_day": 25,
+        "is_lunar_leap": false,
+        "has_jieqi": true,
+        "jieqi": 3
+      }
+    },
+    "day_master": {
+      "stem": "戊",
+      "element": "土"
+    },
+    "pillars": {
+      "year": {
+        "stem": "甲",
+        "branch": "辰",
+        "stem_index": 0,
+        "branch_index": 4,
+        "ten_god": "七杀",
+        "hidden_stems": [
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "比肩"
+          },
+          {
+            "stem": "乙",
+            "index": 1,
+            "ten_god": "正官"
+          },
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正财"
+          }
+        ]
+      },
+      "month": {
+        "stem": "丙",
+        "branch": "寅",
+        "stem_index": 2,
+        "branch_index": 2,
+        "ten_god": "偏印",
+        "hidden_stems": [
+          {
+            "stem": "甲",
+            "index": 0,
+            "ten_god": "七杀"
+          },
+          {
+            "stem": "丙",
+            "index": 2,
+            "ten_god": "偏印"
+          },
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "比肩"
+          }
+        ]
+      },
+      "day": {
+        "stem": "戊",
+        "branch": "戌",
+        "stem_index": 4,
+        "branch_index": 10,
+        "ten_god": "日主",
+        "hidden_stems": [
+          {
+            "stem": "戊",
+            "index": 4,
+            "ten_god": "比肩"
+          },
+          {
+            "stem": "辛",
+            "index": 7,
+            "ten_god": "伤官"
+          },
+          {
+            "stem": "丁",
+            "index": 3,
+            "ten_god": "正印"
+          }
+        ]
+      },
+      "hour": {
+        "stem": "戊",
+        "branch": "午",
+        "stem_index": 4,
+        "branch_index": 6,
+        "ten_god": "比肩",
+        "hidden_stems": [
+          {
+            "stem": "丁",
+            "index": 3,
+            "ten_god": "正印"
+          },
+          {
+            "stem": "己",
+            "index": 5,
+            "ten_god": "劫财"
+          }
+        ]
+      }
+    },
+    "wuxing": {
+      "木": 2,
+      "火": 2,
+      "土": 4,
+      "金": 0,
+      "水": 0
+    }
+  }
+}

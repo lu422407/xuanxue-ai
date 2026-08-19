@@ -1,0 +1,97 @@
+{
+  "system": "bazi",
+  "input": {
+    "birth_datetime": "2024-01-01 23:30:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "男"
+  },
+  "expected": {
+    "system": "bazi",
+    "engine_version": "0.1.0",
+    "input_echo": {
+      "birth_datetime": "2024-01-01 23:30:00",
+      "calendar": "solar",
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false,
+      "bazi_subhour_rule": "midnight",
+      "lunar": {
+        "lunar_year": 2023,
+        "lunar_month": 11,
+        "lunar_day": 20,
+        "is_lunar_leap": false,
+        "has_jieqi": false,
+        "jieqi": null
+      }
+    },
+    "day_master": {
+      "stem": "甲",
+      "element": "木"
+    },
+    "pillars": {
+      "year": {
+        "stem": "癸",
+        "branch": "卯",
+        "stem_index": 9,
+        "branch_index": 3,
+        "ten_god": "正印",
+        "hidden_stems": [
+          {
+            "stem": "乙",
+            "index": 1,
+            "ten_god": "劫财"
+          }
+        ]
+      },
+      "month": {
+        "stem": "甲",
+        "branch": "子",
+        "stem_index": 0,
+        "branch_index": 0,
+        "ten_god": "比肩",
+        "hidden_stems": [
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正印"
+          }
+        ]
+      },
+      "day": {
+        "stem": "甲",
+        "branch": "子",
+        "stem_index": 0,
+        "branch_index": 0,
+        "ten_god": "日主",
+        "hidden_stems": [
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正印"
+          }
+        ]
+      },
+      "hour": {
+        "stem": "丙",
+        "branch": "子",
+        "stem_index": 2,
+        "branch_index": 0,
+        "ten_god": "食神",
+        "hidden_stems": [
+          {
+            "stem": "癸",
+            "index": 9,
+            "ten_god": "正印"
+          }
+        ]
+      }
+    },
+    "wuxing": {
+      "木": 3,
+      "火": 1,
+      "土": 0,
+      "金": 0,
+      "水": 4
+    }
+  }
+}

@@ -1,0 +1,24 @@
+[submodule "third_party/iztro"]
+	path = third_party/iztro
+	url = https://github.com/SylarLong/iztro.git
+[submodule "third_party/py-iztro"]
+	path = third_party/py-iztro
+	url = https://github.com/x-haose/py-iztro.git
+[submodule "third_party/ziwei-doushu"]
+	path = third_party/ziwei-doushu
+	url = https://github.com/Renhuai123/ziwei-doushu.git
+[submodule "third_party/DeepSeek-Oracle"]
+	path = third_party/DeepSeek-Oracle
+	url = https://github.com/Bald0Wang/DeepSeek-Oracle.git
+[submodule "third_party/chinese-metaphysics-skills"]
+	path = third_party/chinese-metaphysics-skills
+	url = https://github.com/dglijin-oss/chinese-metaphysics-skills.git
+[submodule "third_party/ZhouYiLab"]
+	path = third_party/ZhouYiLab
+	url = https://github.com/banderzhm/ZhouYiLab.git
+[submodule "third_party/dalurenpython"]
+	path = third_party/dalurenpython
+	url = https://github.com/wlhyl/dalurenpython.git
+[submodule "third_party/daliuren-web-engine"]
+	path = third_party/daliuren-web-engine
+	url = https://github.com/d1210182010/daliuren-web-engine.git

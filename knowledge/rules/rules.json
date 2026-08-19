@@ -1,0 +1,37 @@
+[
+  {
+    "source_id": "rule_bazi_001",
+    "category": "rules",
+    "title": "十神正官",
+    "text": "正官者，克我而阴阳相异者也。主贵气、职务、名誉，宜旺相得地，忌刑冲破害。",
+    "reference": "《子平真诠》卷一"
+  },
+  {
+    "source_id": "rule_bazi_002",
+    "category": "rules",
+    "title": "日主强弱",
+    "text": "日主强弱以得令、得地、得势三方面综合判断。得令者旺于月令，得地者得地支根气，得势者得天干帮扶。",
+    "reference": "《滴天髓》通神论"
+  },
+  {
+    "source_id": "rule_ziwei_001",
+    "category": "rules",
+    "title": "紫微入命",
+    "text": "紫微星为帝座之星，入命主贵气自尊，喜得左右拱照、天府相朝，忌孤坐无辅。",
+    "reference": "《紫微斗数全书》"
+  },
+  {
+    "source_id": "rule_ziwei_002",
+    "category": "rules",
+    "title": "官禄宫",
+    "text": "官禄宫看事业发展方向与工作成就。主星吉得化科，事业顺遂；遇煞星则多波折变动。",
+    "reference": "《紫微斗数全书》"
+  },
+  {
+    "source_id": "classic_ziwei_001",
+    "category": "classics",
+    "title": "紫微斗数全书·总诀",
+    "text": "紫微斗数，以命宫为枢纽，十二宫为经纬，星曜为象，四化为气，观其组合以断吉凶。",
+    "reference": "《紫微斗数全书》总诀篇"
+  }
+]
