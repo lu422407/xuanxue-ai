@@ -15,7 +15,7 @@
 	url = https://github.com/dglijin-oss/chinese-metaphysics-skills.git
 [submodule "third_party/ZhouYiLab"]
 	path = third_party/ZhouYiLab
-	url = https://github.com/banderzhm/ZhouYiLab.git
+	url = https://github.com/lu422407/ZhouYiLab.git
 [submodule "third_party/dalurenpython"]
 	path = third_party/dalurenpython
 	url = https://github.com/wlhyl/dalurenpython.git
