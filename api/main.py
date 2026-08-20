@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 
+from agents.ai_orchestrator import AIOrchestrator, _METHOD_TO_SYSTEM
 from agents.critic import Critic
 from agents.executor import Executor
 from agents.memory import MemoryAgent
@@ -18,7 +19,11 @@ from api.schemas import (
     ChartResponse,
     ChatRequest,
     ChatResponse,
+    EngineQueryRequest,
+    EngineQueryResponse,
     ErrorResponse,
+    OrchestrateRequest,
+    OrchestrateResponse,
     TraceResponse,
 )
 from engines.base import EngineError
@@ -27,8 +32,37 @@ from engines.ziwei_process import ZiWeiProcessEngine, calculate_ziwei
 from llm.local import RuleBasedLLM
 from observability.cost_tracker import cost_tracker
 from observability.tracing import tracer
+from src.router import XuanXueRouter
 
 app = FastAPI(title="术数 AI Engine Pro", version="0.1.0")
+
+# 多术数 AI 编排器（离线确定性，llm=None）：
+# 复用既有 XuanXueRouter 实例，避免重复加载引擎。
+_ROUTER = XuanXueRouter()
+_AI_ORCH = AIOrchestrator(llm=None, router=_ROUTER)
+
+# 引擎可用性探测（启动时一次）：区分「可运行」与「需编译（奇门/六爻）」
+_DUMMY_INPUT = {
+    "birth_datetime": "1990-08-16 14:00:00",
+    "timezone_offset": 8,
+    "calendar": "solar",
+    "gender": "男",
+}
+_ENGINE_STATUS: dict = {}
+for _method, _engine in _ROUTER.engines.items():
+    _sys = _METHOD_TO_SYSTEM.get(_method)
+    if not _sys or _engine is None:
+        continue
+    try:
+        _engine.calculate(_DUMMY_INPUT)
+        _ENGINE_STATUS[_sys] = {"available": True, "build_required": False, "setup_hint": None}
+    except NotImplementedError as _nie:
+        _ENGINE_STATUS[_sys] = {
+            "available": False, "build_required": True, "setup_hint": str(_nie)
+        }
+    except Exception:
+        # 其他异常（多为输入相关），仍视为引擎可加载运行
+        _ENGINE_STATUS[_sys] = {"available": True, "build_required": False, "setup_hint": None}
 
 
 def _require_auth(x_api_key: Optional[str] = Header(None)) -> str:
@@ -90,6 +124,35 @@ def chat(req: ChatRequest, api_key: str = Depends(_require_auth)):
     result = orch.run(req.question, {"birth_input": birth})
     return {"answer": result.answer, "trace_id": result.trace_id,
             "intent_type": result.intent_type, "validation": result.validation}
+
+
+@app.post("/api/orchestrate", response_model=OrchestrateResponse)
+def orchestrate(req: OrchestrateRequest, api_key: str = Depends(_require_auth)):
+    """多术数 AI 编排：理解 → 选择 → 确定性计算 → 校验 → 综合 → 解释。"""
+    _check_rate_limit(api_key)
+    result = _AI_ORCH.run({
+        "question": req.question,
+        "user_context": req.user_context or {},
+        "trace_id": req.trace_id,
+    })
+    return result.to_dict()
+
+
+@app.post("/api/engine/{system}", response_model=EngineQueryResponse)
+def query_engine(system: str, req: EngineQueryRequest,
+                 api_key: str = Depends(_require_auth)):
+    """单术数确定性查询（六壬用 divination_datetime，铁板可用 known_facts 考刻）。"""
+    _check_rate_limit(api_key)
+    input_data = {
+        "birth_datetime": req.birth_datetime,
+        "timezone_offset": req.timezone_offset,
+        "calendar": req.calendar,
+        "gender": req.gender,
+    }
+    if req.divination_datetime:
+        input_data["divination_datetime"] = req.divination_datetime
+    resp = _AI_ORCH.run_single(system, input_data, known_facts=req.known_facts)
+    return {"system": system, **resp}
 
 
 @app.get("/api/analyze/{trace_id}", response_model=TraceResponse)

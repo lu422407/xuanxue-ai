@@ -1,0 +1,110 @@
+[
+  {
+    "id": "TB-1001",
+    "ke": 0,
+    "fen": 0,
+    "category": "兄弟",
+    "text": "手足三人，兄为长，己居次，幼弟聪慧，家门和顺。",
+    "siblings": "3",
+    "self_rank": "2",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["兄弟", "排行", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1002",
+    "ke": 1,
+    "fen": 2,
+    "category": "夫妻",
+    "text": "夫妇相敬如宾，中年聚少离多，晚岁白首相依。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["夫妻", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1003",
+    "ke": 2,
+    "fen": 3,
+    "category": "父母",
+    "text": "严父慈母，母性柔顺，父道刚正，育子有成。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["父母", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1004",
+    "ke": 3,
+    "fen": 5,
+    "category": "子女",
+    "text": "子女一双，长女先至，次子后得，教养成才。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["子女", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1005",
+    "ke": 4,
+    "fen": 1,
+    "category": "自身",
+    "text": "性刚而心细，初年多磨，壮岁渐显，晚景安然。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["自身", "性格", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1006",
+    "ke": 5,
+    "fen": 6,
+    "category": "流年",
+    "text": "牛年马岁多顺遂，逢鸡猪之年宜守，慎防口舌。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["流年", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1007",
+    "ke": 6,
+    "fen": 8,
+    "category": "其他",
+    "text": "住宅宜坐北朝南，门前有池水聚财，利文昌方位。",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["其他", "风水", "扩充"]
+    }
+  },
+  {
+    "id": "TB-1008",
+    "ke": 7,
+    "fen": 4,
+    "category": "父母",
+    "text": "父属猴、母属虎者，双亲寿长，家业渐丰。",
+    "father_zodiac": "猴",
+    "mother_zodiac": "虎",
+    "meta": {
+      "source": "扩充样本（非真实流传条文）",
+      "verified": false,
+      "confidence": "示例",
+      "tags": ["父母", "属相", "扩充"]
+    }
+  }
+]

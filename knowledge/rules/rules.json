@@ -33,5 +33,40 @@
     "title": "紫微斗数全书·总诀",
     "text": "紫微斗数，以命宫为枢纽，十二宫为经纬，星曜为象，四化为气，观其组合以断吉凶。",
     "reference": "《紫微斗数全书》总诀篇"
+  },
+  {
+    "source_id": "rule_liuren_001",
+    "category": "rules",
+    "title": "大六壬·月将加时",
+    "text": "六壬起课以月将加正时，天地盘旋转而定四课，取三传以断事之始终。月将以中气为界。",
+    "reference": "《六壬大全》"
+  },
+  {
+    "source_id": "rule_liuren_002",
+    "category": "rules",
+    "title": "大六壬·三传九宗门",
+    "text": "九宗门（贼克、比用、涉害、遥克、昴星、别责、八专、伏吟、反吟）为取传之要，四课上下生克为凭。",
+    "reference": "《大六壬心镜》"
+  },
+  {
+    "source_id": "rule_tieban_001",
+    "category": "rules",
+    "title": "铁板神数·考刻定分",
+    "text": "铁板神数以出生时刻定刻分，刻分既定则六亲、穷通、寿夭各有条文可查。考刻以亲属事实反推为要。",
+    "reference": "《铁板神数》民间传本"
+  },
+  {
+    "source_id": "classic_liuren_001",
+    "category": "classics",
+    "title": "六壬大全·大六壬法",
+    "text": "大六壬，人事之王。以天盘加地盘，四课三传为体，天将神煞为用，占断人事吉凶。",
+    "reference": "《六壬大全》卷一"
+  },
+  {
+    "source_id": "classic_tieban_001",
+    "category": "classics",
+    "title": "铁板神数·太玄数起例",
+    "text": "太玄数起于邵康节，以年月日时配数成卦，演绎条文一千二百，天地人物各有定数。",
+    "reference": "《邵子神数》"
   }
 ]

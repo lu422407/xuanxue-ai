@@ -131,10 +131,10 @@ class TieBanEngine(BaseEngine):
     # ---- 内部实现 ----
 
     def _ziwei_calculate(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        if self._ziwei is None:
-            from engines.ziwei_engine import ZiWeiEngine
-            self._ziwei = ZiWeiEngine()
-        return self._ziwei.calculate(input_data)
+        # 用进程代理引擎排紫微，规避 py-iztro/pythonmonkey
+        # 在 Windows 非主线程（API 线程池 / TestClient）崩溃。
+        from engines.ziwei_process import calculate_ziwei
+        return calculate_ziwei(input_data)
 
     def _load_tiaowen(self) -> List[Dict]:
         tiaowen: List[Dict] = []

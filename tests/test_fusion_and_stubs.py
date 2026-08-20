@@ -36,15 +36,7 @@ def test_career_analyzer_shape():
     assert "不构成" in result["disclaimer"]
 
 
-@pytest.mark.parametrize("cls", [QiMenEngine, LiuYaoEngine])
-def test_unimplemented_engines_raise(cls):
-    engine = cls()
-    assert isinstance(engine, BaseEngine)
-    with pytest.raises(NotImplementedError):
-        engine.calculate({})
-
-
-@pytest.mark.parametrize("cls", [LiuRenEngine, TieBanEngine])
+@pytest.mark.parametrize("cls", [LiuRenEngine, TieBanEngine, QiMenEngine, LiuYaoEngine])
 def test_implemented_engines_reject_empty_input(cls):
     engine = cls()
     assert isinstance(engine, BaseEngine)
