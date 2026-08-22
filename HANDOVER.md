@@ -134,6 +134,7 @@ cd ../..
 - ✅ Phase B：八字日主↔紫微命宫五行生克交叉印证（`cross_validate_bazi_ziwei` 纯函数 + 单测）
 - ✅ Phase E：RAG 溯源接入编排层（`synthesis.citations` 填充可校验的 `[source:id]` 引用，附于答案）
 - ✅ coverage 工具（`.coveragerc` + pytest-cov）与 GitHub Actions CI（`.github/workflows/ci.yml`，覆盖率红线 80%）
+- ✅ CI 双 job：`cpp-cli` 在 Linux（clang-20 + libc++）编译 ZhouYiLab 并真实执行奇门/六爻链路（186 测试 0 skip；job 内置"出现 skip 即失败"保险）。ZhouYiLab 的 CMake 已内置 Linux libc++ 路径探测（`cmake/DetectStdLibModulePaths.cmake`），Linux 编译开箱即用
 
 ---
 
