@@ -9,7 +9,7 @@
 
 ## 0. 一句话结论
 
-六个引擎（八字/紫微/六壬/铁板/奇门/六爻）**全部接入完毕并可运行**；编排层 Phase A–E 已完成（含五行交叉印证与 RAG 古籍引用溯源）；全量 pytest **186 个测试全绿**，覆盖率 **83%**（红线 >80%，CI 已强制执行）。无 ZhouYiLab CLI 时奇门链路测试自动 skip。剩余工作：真实条文库（需素材）、validator 亮度校验、Docker 内 CLI、LLM 真接入、用户成长助手。
+六个引擎（八字/紫微/六壬/铁板/奇门/六爻）**全部接入完毕并可运行**；编排层 Phase A–F 已完成（五行交叉印证、RAG 引用溯源、全链路 trace）；黄金测试覆盖 6/6 引擎，全量 pytest **202 个测试全绿**，覆盖率 **84.7%**（红线 >80%，CI 双 job 强制执行：纯 Python + Linux 编译 C++ 真跑奇门/六爻）。剩余工作见 `docs/COMPROMISES.md` 二/三/四档（真实条文库需素材、数据安全红线需决策、validator 亮度校验等）。
 
 ---
 
@@ -71,7 +71,7 @@ cmake --build build_llvm --target example_zhouyi_cli   # 只需这一个目标
 
 # 4. 测试
 cd ../..
-.venv/bin/pytest -q                    # 期望 186 passed（未编译 CLI 时 184 passed + 2 skipped）
+.venv/bin/pytest -q                    # 期望 202 passed（未编译 CLI 时 qimen/liuyao 相关用例自动 skip）
 .venv/bin/pytest --cov --cov-fail-under=80   # 覆盖率红线（CI 同款命令）
 ```
 
@@ -130,6 +130,13 @@ cd ../..
 - Docker 镜像未包含 ZhouYiLab CLI，奇门/六爻在容器内不可用（其余功能正常）
 - `src/router.py` `_extract_params` 的 hour 提取顺序问题（审计报告遗留，低风险）
 
+### 已完成（2026-08-22 第三批，详见 docs/COMPROMISES.md）
+- ✅ 黄金测试补齐 6/6 引擎（qimen/liuyao/liuren/tieban 各有用例；奇门与 demo 输出交叉验证；Linux/macOS 跨平台一致已由 CI 证实）
+- ✅ Critic 防幻觉扩展至奇门（九星/八门/八神）、六爻（爻位-六神/六亲爻/纳甲）、六壬（月将）
+- ✅ Phase F 真接线：编排 8 阶段 span + cost_tracker；LLM/抽参/意图分类降级全部有日志；默认 API key 启动告警
+- ✅ validator 六壬结构校验 + 亮度表完整性自检
+- ✅ 测试基线 186 → **202**，覆盖率 83% → **84.7%**
+
 ### 已完成（2026-08-22 第二批）
 - ✅ Phase B：八字日主↔紫微命宫五行生克交叉印证（`cross_validate_bazi_ziwei` 纯函数 + 单测）
 - ✅ Phase E：RAG 溯源接入编排层（`synthesis.citations` 填充可校验的 `[source:id]` 引用，附于答案）
@@ -140,7 +147,7 @@ cd ../..
 
 ## 6. 项目核心约束（任何修改必须遵守）
 
-1. **不删除/削弱任何现有测试**（当前 186 测试基线不可退化）
+1. **不删除/削弱任何现有测试**（当前 202 测试基线不可退化）
 2. **LLM 不负责计算**（只在 Explain 阶段使用，所有排盘由 `engines/*` 确定性完成）
 3. **不引入不可追踪的大型依赖**（仅用已锁定的 requirements.txt + submodule）
 4. **不修改 tieban_engine 核心算法**（条文库是数据驱动，与算法解耦）
