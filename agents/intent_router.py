@@ -9,9 +9,12 @@ design: detect(question, classifier) 中的 classifier 为可调用对象，
 生产环境使用 LLM 结构化输出；测试可使用 FakeClassifier。
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.6
 
@@ -56,8 +59,8 @@ class IntentRouter:
                     confidence = float(data.get("confidence", 1.0))
                     need = data.get("need") or _NEED_BY_TYPE.get(intent_type, [])
                     return IntentResult(intent_type, need, confidence, from_llm=True)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("LLM 意图分类失败，回退启发式: %s", exc)
         return self._heuristic_detect(question)
 
     def needs_clarification(self, intent: IntentResult) -> bool:

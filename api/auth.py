@@ -3,15 +3,25 @@
 - API Key 鉴权：请求头 X-API-Key
 - 生产环境可将密钥存储于数据库/密钥管理服务；
   本地演示从环境变量 XUANXUE_API_KEYS 读取（逗号分隔），
-  未设置时使用默认开发密钥 dev-key-0001。
+  未设置时使用默认开发密钥 dev-key-0001（会输出显著告警）。
 """
 
+import logging
 import os
 from typing import Optional
 
+logger = logging.getLogger(__name__)
+
+_ENV_KEYS = os.environ.get("XUANXUE_API_KEYS")
+if not _ENV_KEYS:
+    logger.warning(
+        "未设置 XUANXUE_API_KEYS，启用默认开发密钥 dev-key-0001 —— "
+        "生产环境必须配置独立密钥后再对外暴露服务"
+    )
+
 _API_KEYS = set(
     k.strip()
-    for k in os.environ.get("XUANXUE_API_KEYS", "dev-key-0001").split(",")
+    for k in (_ENV_KEYS or "dev-key-0001").split(",")
     if k.strip()
 )
 

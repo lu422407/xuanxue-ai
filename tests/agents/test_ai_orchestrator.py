@@ -247,3 +247,23 @@ def test_run_populates_verifiable_citations():
 def test_no_citations_for_offtopic_question():
     r = _orch().run({"question": "你好呀，今天天气怎么样", "user_context": {}})
     assert r.synthesis["citations"] == []
+
+
+# ---- Phase F：链路追踪 ----
+
+def test_run_records_trace_spans_and_cost():
+    from observability.cost_tracker import cost_tracker
+    from observability.tracing import tracer
+
+    r = _orch().run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}},
+    })
+    assert r.trace_id, "未提供 trace_id 时应自动生成"
+    spans = [s["name"] for s in tracer.get_trace(r.trace_id)]
+    for stage in ("shield", "understand", "select", "dispatch",
+                  "validate", "synthesize", "citations", "explain"):
+        assert f"ai_orchestrator.{stage}" in spans, f"缺 span: {stage}"
+    cost = cost_tracker.get(r.trace_id)
+    assert cost and "bazi" in cost["engines"]

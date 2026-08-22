@@ -33,6 +33,8 @@ from engines import (
 )
 from engines.base import EngineError
 from engines.ziwei_process import ZiWeiProcessEngine
+from observability.cost_tracker import cost_tracker
+from observability.tracing import tracer
 from rag.knowledge_loader import load_knowledge
 from rag.retriever import Retriever, _bigrams
 from src.router import XuanXueRouter
@@ -239,45 +241,59 @@ class AIOrchestrator:
                 user_context=request.get("user_context"),
                 trace_id=request.get("trace_id"),
             )
+        # Phase F：每次编排生成 trace（调用方未提供时），全链路 span + 成本记录
+        trace_id = request.trace_id or tracer.new_trace_id()
 
         # ① Shield —— 注入拦截
-        guard = self._guard(request.question)
+        with tracer.span(trace_id, "ai_orchestrator.shield"):
+            guard = self._guard(request.question)
         if guard.blocked:
             return self._blocked_response(guard, request)
 
         # ② Understander —— 题意识别 + 参数抽取（无 LLM 计算）
-        intent = self.intent_router.detect(request.question)
-        parsed_params = self._extract_birth_params(request)
-        known_facts = self._collect_known_facts(request, parsed_params)
+        with tracer.span(trace_id, "ai_orchestrator.understand"):
+            intent = self.intent_router.detect(request.question)
+            parsed_params = self._extract_birth_params(request)
+            known_facts = self._collect_known_facts(request, parsed_params)
 
         # ③ Selector —— 术数类型选择（融合路由 + 话题意图）
-        selected = self._select(request.question, intent)
+        with tracer.span(trace_id, "ai_orchestrator.select"):
+            selected = self._select(request.question, intent)
 
         # ④ Dispatcher —— 确定性引擎计算（LLM 不参与）
-        calls = self._dispatch(selected, parsed_params, known_facts)
+        with tracer.span(trace_id, "ai_orchestrator.dispatch"):
+            calls = self._dispatch(selected, parsed_params, known_facts)
         engine_results = {c.system: c.result for c in calls if c.result is not None}
         skipped = [
             {"system": c.system, "reason": c.error}
             for c in calls
             if c.result is None
         ]
+        if engine_results:
+            cost_tracker.record(trace_id, engines=list(engine_results.keys()))
 
         # ⑤ Validator —— 硬性规则校验
-        validation = self._validate(engine_results)
+        with tracer.span(trace_id, "ai_orchestrator.validate"):
+            validation = self._validate(engine_results)
 
         # ⑥ Synthesizer —— 跨术数交叉印证（纯比对）
-        synthesis = self._synthesize(engine_results)
+        with tracer.span(trace_id, "ai_orchestrator.synthesize"):
+            synthesis = self._synthesize(engine_results)
 
         # ⑥.5 Phase E：RAG 溯源 —— 填充可校验的古籍引用（增强信息，失败不阻断）
-        try:
-            synthesis.citations.extend(
-                self._collect_citations(request.question, engine_results)
-            )
-        except Exception as exc:
-            logger.warning("RAG 引用收集失败（不影响主链路）: %s", exc)
+        with tracer.span(trace_id, "ai_orchestrator.citations"):
+            try:
+                synthesis.citations.extend(
+                    self._collect_citations(request.question, engine_results)
+                )
+            except Exception as exc:
+                logger.warning("RAG 引用收集失败（不影响主链路）: %s", exc)
+        if synthesis.citations:
+            cost_tracker.record(trace_id, rag_searches=1)
 
         # ⑦ Explainer —— LLM 生成解释（失败回退原始命盘）
-        answer = self._explain(engine_results, synthesis, validation)
+        with tracer.span(trace_id, "ai_orchestrator.explain"):
+            answer = self._explain(engine_results, synthesis, validation, trace_id)
 
         # 引用附于 Critic 校验之后：引用来自知识库本身，可由 citation_checker 复核
         if synthesis.citations:
@@ -290,7 +306,7 @@ class AIOrchestrator:
 
         return AIOrchestratorResponse(
             answer=answer,
-            trace_id=request.trace_id,
+            trace_id=trace_id,
             systems_invoked=list(engine_results.keys()),
             systems_skipped=skipped,
             engine_results=engine_results,
@@ -315,8 +331,8 @@ class AIOrchestrator:
         # 1) 兼容 router 既有抽取
         try:
             params.update(self.router._extract_params(text))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("router._extract_params 异常（继续用编排层补抽逻辑）: %s", exc)
 
         # 2) 补抽：YYYY年(阳历|阴历|农历)?M月D日
         if "year" not in params:
@@ -582,11 +598,13 @@ class AIOrchestrator:
         engine_results: Dict[str, Any],
         synthesis: SynthesisResult,
         validation: Dict[str, Any],
+        trace_id: Optional[str] = None,
     ) -> str:
         if self.llm is not None:
             try:
-                text = self._llm_explain(engine_results, synthesis)
-            except Exception:
+                text = self._llm_explain(engine_results, synthesis, trace_id)
+            except Exception as exc:
+                logger.warning("LLM 解释失败，回退确定性摘要: %s", exc)
                 text = self._text_summary(engine_results, synthesis)
         else:
             text = self._text_summary(engine_results, synthesis)
@@ -597,7 +615,10 @@ class AIOrchestrator:
             text = self._text_summary(engine_results, synthesis)
         return text
 
-    def _llm_explain(self, engine_results: Dict[str, Any], synthesis: SynthesisResult) -> str:
+    def _llm_explain(
+        self, engine_results: Dict[str, Any], synthesis: SynthesisResult,
+        trace_id: Optional[str] = None,
+    ) -> str:
         system_prompt = (
             "你是传统术数文化研究助手。仅依据下方各引擎输出的结构化命盘数据，"
             "用自然语言归纳用户关心的要点。严禁编造星曜、宫位、干支或结论。"
@@ -607,6 +628,8 @@ class AIOrchestrator:
             f"各引擎命盘数据：{engine_results}"
         )
         resp = self.llm.generate(system_prompt, user_content)
+        if trace_id:
+            cost_tracker.record(trace_id)
         return resp.get("content", "")
 
     @staticmethod
