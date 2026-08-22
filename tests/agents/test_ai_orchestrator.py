@@ -187,3 +187,63 @@ def test_extract_birth_params_from_question():
 def test_synthesis_result_to_dict():
     s = SynthesisResult(consensus=["a"], divergences=["b"], citations=["c"])
     assert s.to_dict() == {"consensus": ["a"], "divergences": ["b"], "citations": ["c"]}
+
+# ---- Phase B：五行生克交叉印证 ----
+
+def test_wuxing_relation():
+    from agents.ai_orchestrator import wuxing_relation
+    assert wuxing_relation("火", "土") == "火生土"
+    assert wuxing_relation("土", "火") == "火生土"
+    assert wuxing_relation("水", "水") == "比和"
+    assert wuxing_relation("水", "火") == "水克火"
+    assert wuxing_relation("火", "水") == "水克火"
+
+
+def test_cross_validate_bazi_ziwei():
+    from agents.ai_orchestrator import cross_validate_bazi_ziwei
+    bazi = {"pillars": {"day": {"stem": "丙"}}}
+    ziwei = {"palaces": {"命宫": {"position": "丑", "major_stars": ["天机"]}}}
+    cons = cross_validate_bazi_ziwei(bazi, ziwei)
+    # 丙属火、丑属土 → 火生土；天机属木 → 木生火
+    assert any("火生土" in c for c in cons)
+    assert any("木生火" in c for c in cons)
+    # 数据缺失时静默返回空（不编造）
+    assert cross_validate_bazi_ziwei({}, ziwei) == []
+
+
+def test_synthesis_contains_cross_validation():
+    r = _orch().run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}},
+    })
+    joined = "；".join(r.synthesis["consensus"])
+    assert "五行关系" in joined  # Phase B：真实生克比对已进入 consensus
+
+
+# ---- Phase E：RAG 溯源引用 ----
+
+def test_run_populates_verifiable_citations():
+    r = _orch().run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}},
+    })
+    cites = r.synthesis["citations"]
+    assert cites, "Phase E：synthesis.citations 应被填充"
+    assert all("[source:" in c for c in cites)
+    assert "参考：" in r.answer
+    # 引用必须能被 citation_checker 校验（source_id 真实存在于知识库）
+    from rag.citation_checker import check_citations
+    from rag.knowledge_loader import load_knowledge
+    from rag.retriever import Retriever
+
+    store = Retriever()
+    load_knowledge(store)
+    report = check_citations("\n".join(cites), store.store)
+    assert report.passed, f"无效引用: {report.invalid_sources}"
+
+
+def test_no_citations_for_offtopic_question():
+    r = _orch().run({"question": "你好呀，今天天气怎么样", "user_context": {}})
+    assert r.synthesis["citations"] == []

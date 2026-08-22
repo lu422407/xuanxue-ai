@@ -15,6 +15,7 @@ LLM 为可选项（默认 None）：无 LLM 时 Explainer 走确定性文本摘�
 保证离线、可测试、不编造命盘要素。
 """
 
+import logging
 import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
@@ -32,8 +33,12 @@ from engines import (
 )
 from engines.base import EngineError
 from engines.ziwei_process import ZiWeiProcessEngine
+from rag.knowledge_loader import load_knowledge
+from rag.retriever import Retriever, _bigrams
 from src.router import XuanXueRouter
 from src.validator import FactValidator
+
+logger = logging.getLogger(__name__)
 
 # 路由中文术数名 → 引擎 system key
 _METHOD_TO_SYSTEM = {
@@ -64,6 +69,75 @@ _HOUR_MAP = {
     "子时": 0, "丑时": 2, "寅时": 4, "卯时": 6, "辰时": 8, "巳时": 10,
     "午时": 12, "未时": 14, "申时": 16, "酉时": 18, "戌时": 20, "亥时": 22,
 }
+
+# ---- Phase B：五行生克映射（纯函数，供八字↔紫微交叉印证） ----
+
+TIAN_GAN_WUXING: Dict[str, str] = {
+    "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土",
+    "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水",
+}
+DI_ZHI_WUXING: Dict[str, str] = {
+    "子": "水", "丑": "土", "寅": "木", "卯": "木", "辰": "土", "巳": "火",
+    "午": "火", "未": "土", "申": "金", "酉": "金", "戌": "土", "亥": "水",
+}
+# 十四主星五行（通行归属，《紫微斗数全书》）
+MAJOR_STAR_WUXING: Dict[str, str] = {
+    "紫微": "土", "天机": "木", "太阳": "火", "武曲": "金", "天同": "水",
+    "廉贞": "火", "天府": "土", "太阴": "水", "贪狼": "木", "巨门": "土",
+    "天相": "水", "天梁": "土", "七杀": "金", "破军": "水",
+}
+WUXING_SHENG: Dict[str, str] = {
+    "木": "火", "火": "土", "土": "金", "金": "水", "水": "木",
+}
+WUXING_KE: Dict[str, str] = {
+    "木": "土", "土": "水", "水": "火", "火": "金", "金": "木",
+}
+
+
+def wuxing_relation(a: str, b: str) -> str:
+    """a 对 b 的五行关系描述（比和 / 相生 / 相克）。"""
+    if a == b:
+        return "比和"
+    if WUXING_SHENG.get(a) == b:
+        return f"{a}生{b}"
+    if WUXING_SHENG.get(b) == a:
+        return f"{b}生{a}"
+    if WUXING_KE.get(a) == b:
+        return f"{a}克{b}"
+    return f"{b}克{a}"
+
+
+def cross_validate_bazi_ziwei(
+    bazi_chart: Dict[str, Any], ziwei_chart: Dict[str, Any]
+) -> tuple:
+    """八字日主 ↔ 紫微命宫交叉印证（纯比对）。
+
+    仅陈述两系统间的五行生克事实，不下吉凶结论——
+    判断留给人 / LLM 解释层，编排层保证事实可复核。
+    """
+    consensus: List[str] = []
+    day_stem = ((bazi_chart.get("pillars") or {}).get("day") or {}).get("stem")
+    ming = (ziwei_chart.get("palaces") or {}).get("命宫") or {}
+    position = ming.get("position")
+    stars = ming.get("major_stars") or []
+    if not day_stem or not position:
+        return consensus
+    day_wx = TIAN_GAN_WUXING.get(day_stem)
+    palace_wx = DI_ZHI_WUXING.get(position)
+    if day_wx and palace_wx:
+        consensus.append(
+            f"八字日主{day_stem}属{day_wx}，紫微命宫居{position}属{palace_wx}，"
+            f"五行关系：{wuxing_relation(day_wx, palace_wx)}"
+        )
+    if stars and day_wx:
+        star = stars[0] if isinstance(stars[0], str) else stars[0].get("name", "")
+        star_wx = MAJOR_STAR_WUXING.get(star)
+        if star_wx:
+            consensus.append(
+                f"日主{day_stem}({day_wx})与命宫主星{star}({star_wx})，"
+                f"五行关系：{wuxing_relation(day_wx, star_wx)}"
+            )
+    return consensus
 
 
 @dataclass
@@ -145,6 +219,7 @@ class AIOrchestrator:
         critic: Optional[Critic] = None,
         validator: Optional[FactValidator] = None,
         intent_router: Optional[IntentRouter] = None,
+        retriever: Optional[Retriever] = None,
     ) -> None:
         self.llm = llm
         self.router = router or XuanXueRouter()
@@ -152,6 +227,8 @@ class AIOrchestrator:
         self.critic = critic or Critic()
         self.validator = validator or FactValidator()
         self.intent_router = intent_router or IntentRouter()
+        # Phase E：RAG 检索器（可注入；缺省懒加载 knowledge/ 知识库）
+        self.retriever = retriever
 
     # ---- 顶层入口 ----
 
@@ -191,8 +268,22 @@ class AIOrchestrator:
         # ⑥ Synthesizer —— 跨术数交叉印证（纯比对）
         synthesis = self._synthesize(engine_results)
 
+        # ⑥.5 Phase E：RAG 溯源 —— 填充可校验的古籍引用（增强信息，失败不阻断）
+        try:
+            synthesis.citations.extend(
+                self._collect_citations(request.question, engine_results)
+            )
+        except Exception as exc:
+            logger.warning("RAG 引用收集失败（不影响主链路）: %s", exc)
+
         # ⑦ Explainer —— LLM 生成解释（失败回退原始命盘）
         answer = self._explain(engine_results, synthesis, validation)
+
+        # 引用附于 Critic 校验之后：引用来自知识库本身，可由 citation_checker 复核
+        if synthesis.citations:
+            answer += "\n参考：\n" + "\n".join(
+                f"- {c}" for c in synthesis.citations
+            )
 
         # ⑧ Disclaimer —— 注入免责声明
         answer = wrap_disclaimer(answer)
@@ -350,12 +441,8 @@ class AIOrchestrator:
                 calls.append(
                     EngineCall(system=system, input=engine_input, available=True, result=result)
                 )
-            except NotImplementedError as nie:
-                # 未编译（如奇门/六爻）→ 优雅降级，附 setup_hint
-                calls.append(
-                    EngineCall(system=system, input=engine_input, available=False, error=str(nie))
-                )
             except EngineError as ee:
+                # 引擎不可用（如奇门/六爻 CLI 未编译）→ 优雅降级
                 calls.append(
                     EngineCall(
                         system=system, input=engine_input, available=False,
@@ -417,30 +504,76 @@ class AIOrchestrator:
         for system in engine_results:
             consensus.append(f"已生成 {system} 命盘")
 
-        # 交叉印证：八字日主 vs 紫微命宫主星一致性（Phase B 核心）
-        bazi_day = None
-        ziwei_main = None
-        if "bazi" in engine_results:
-            pillars = engine_results["bazi"].get("pillars", {})
-            if pillars:
-                bazi_day = pillars.get("day", {}).get("stem")
-        if "ziwei" in engine_results:
-            palaces = engine_results["ziwei"].get("palaces", {})
-            if palaces:
-                minggong = palaces.get("命宫", {})
-                stars = minggong.get("major_stars", [])
-                # 真实引擎输出字符串列表
-                ziwei_main = stars[0] if stars else None
-        if bazi_day and ziwei_main:
-            # 简化一致性判断（实际应做完整的星曜-干支映射，这里做结构示例）
-            consensus.append(f"八字日主({bazi_day})与紫微命宫主星({ziwei_main})已生成，可进一步交叉印证")
-        elif bazi_day or ziwei_main:
+        # 交叉印证：八字日主 ↔ 紫微命宫五行生克（Phase B，纯比对事实）
+        bazi_chart = engine_results.get("bazi")
+        ziwei_chart = engine_results.get("ziwei")
+        if bazi_chart and ziwei_chart:
+            consensus.extend(cross_validate_bazi_ziwei(bazi_chart, ziwei_chart))
+        elif bazi_chart or ziwei_chart:
             consensus.append("跨术数交叉印证数据部分可用（部分缺失）")
 
-        # 引用：保留为空列表，供未来 RAG 溯源（Phase E）填充
-        # citations = ["待接入 RAG 引用"]
-
         return SynthesisResult(consensus=consensus, divergences=divergences, citations=citations)
+
+    # ---- ⑥.5 RAG 溯源（Phase E） ----
+
+    def _ensure_retriever(self) -> Optional[Retriever]:
+        if self.retriever is None:
+            retriever = Retriever()
+            load_knowledge(retriever)
+            self.retriever = retriever
+        return self.retriever
+
+    def _collect_citations(
+        self,
+        question: str,
+        engine_results: Dict[str, Any],
+        top_k: int = 3,
+        min_score: float = 0.12,
+    ) -> List[str]:
+        """检索古籍/规则知识，返回带 [source:id] 的引用串（可被 citation_checker 校验）。
+
+        过滤策略：哈希向量存在 ~0.1 的噪声基线，故要求文档与查询
+        有字面 bigram 重叠且总分达到阈值，避免无关问题引出"古籍"。
+        """
+        retriever = self._ensure_retriever()
+        if retriever is None:
+            return []
+
+        zh_names = {
+            "bazi": "八字", "ziwei": "紫微斗数", "liuren": "大六壬",
+            "tieban": "铁板神数", "qimen": "奇门遁甲", "liuyao": "六爻",
+        }
+        parts: List[str] = [question]
+        parts += [zh_names[s] for s in engine_results if s in zh_names]
+        ziwei = engine_results.get("ziwei") or {}
+        stars = ((ziwei.get("palaces") or {}).get("命宫") or {}).get("major_stars") or []
+        if stars:
+            first = stars[0] if isinstance(stars[0], str) else stars[0].get("name", "")
+            if first:
+                parts.append(first)
+        bazi = engine_results.get("bazi") or {}
+        day_stem = ((bazi.get("pillars") or {}).get("day") or {}).get("stem")
+        if day_stem:
+            parts.append(day_stem)
+        query = " ".join(parts)
+
+        query_bigrams = _bigrams(query)
+        if not query_bigrams:
+            return []
+        citations: List[str] = []
+        for hit in retriever.retrieve(query, top_k=8):
+            if hit["score"] < min_score:
+                continue
+            if not (query_bigrams & _bigrams(hit["text"])):
+                continue
+            meta = hit.get("metadata") or {}
+            title = meta.get("title") or hit["doc_id"]
+            reference = meta.get("reference") or ""
+            ref_part = f"（{reference}）" if reference else ""
+            citations.append(f"{title}{ref_part}[source:{hit['doc_id']}]")
+            if len(citations) >= top_k:
+                break
+        return citations
 
     # ---- ⑦ Explainer ----
 
@@ -519,7 +652,7 @@ class AIOrchestrator:
         """单术数调用：返回 {available, result?, error?}。
 
         与 Dispatcher 逻辑一致，供 API /api/engine/{system} 复用，
-        同样对 NotImplementedError（未编译）与 EngineError 做优雅降级。
+        对 EngineError（未编译/参数缺失等）做优雅降级。
         """
         engine_cls = _SYSTEM_TO_ENGINE.get(system)
         if engine_cls is None:
@@ -531,8 +664,6 @@ class AIOrchestrator:
             else:
                 result = engine.calculate(input_data)
             return {"available": True, "result": result}
-        except NotImplementedError as nie:
-            return {"available": False, "error": str(nie)}
         except EngineError as ee:
             return {"available": False, "error": f"引擎计算失败：{ee.message}"}
         except Exception as exc:
