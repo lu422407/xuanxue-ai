@@ -14,6 +14,7 @@ COPY knowledge ./knowledge
 COPY database ./database
 COPY llm ./llm
 COPY observability ./observability
+COPY src ./src
 COPY conftest.py ./
 
 ENV XUANXUE_API_KEYS=${XUANXUE_API_KEYS:-dev-key-0001}

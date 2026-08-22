@@ -14,7 +14,15 @@ from engines.base import EngineError
 
 _BINARY_NAME = "example_zhouyi_cli.exe" if os.name == "nt" else "example_zhouyi_cli"
 
-_DEFAULT_BINARY = Path(__file__).resolve().parent.parent / "third_party" / "ZhouYiLab" / "build" / "examples" / _BINARY_NAME
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_ZHOUYILAB = _REPO_ROOT / "third_party" / "ZhouYiLab"
+
+# 依次探测常见编译目录：build（Linux/Windows 默认）与 build_llvm（macOS LLVM 路线）
+_CANDIDATES = [
+    _ZHOUYILAB / "build" / "examples" / _BINARY_NAME,
+    _ZHOUYILAB / "build_llvm" / "examples" / _BINARY_NAME,
+    _REPO_ROOT / "bin" / _BINARY_NAME,
+]
 
 _TIMEOUT = 30.0
 
@@ -23,17 +31,13 @@ def _resolve_binary() -> Path:
     override = os.environ.get("ZHOUYILAB_CLI")
     if override:
         return Path(override)
-    if _DEFAULT_BINARY.exists():
-        return _DEFAULT_BINARY
-    for candidate in [
-        Path(__file__).resolve().parent.parent / "third_party" / "ZhouYiLab" / "build" / "examples",
-        Path(__file__).resolve().parent.parent / "bin",
-    ]:
-        p = candidate / _BINARY_NAME
-        if p.exists():
-            return p
+    for candidate in _CANDIDATES:
+        if candidate.exists():
+            return candidate
     raise EngineError(
-        "ZhouYiLab CLI 未找到，请先编译：cd third_party/ZhouYiLab && cmake -B build && cmake --build build --target example_zhouyi_cli",
+        "ZhouYiLab CLI 未找到，请先编译：cd third_party/ZhouYiLab && cmake -B build_llvm -G Ninja "
+        "-DBUILD_EXAMPLES=ON -DZHOUYILAB_MODULE_MODE=LOCAL <编译器参数> "
+        "&& cmake --build build_llvm --target example_zhouyi_cli（macOS 完整步骤见 scripts/setup_submodules.sh）",
         code="ZHOUYILAB_CLI_NOT_FOUND",
     )
 

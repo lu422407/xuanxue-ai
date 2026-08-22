@@ -1,10 +1,12 @@
 """API 测试：鉴权、限流、trace 回溯。"""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
 from api.rate_limit import default_limiter
 from api.auth import register_key
+from engines import zhouyi_bridge
 from observability.tracing import tracer
 
 client = TestClient(app)
@@ -175,6 +177,10 @@ def test_engine_query_liuren_with_divination():
     assert body["result"]["divination_time"] == "2019-01-15 20:30:00"
 
 
+@pytest.mark.skipif(
+    not zhouyi_bridge.cli_available(),
+    reason="ZhouYiLab CLI 未编译，奇门链路不可用（编译步骤见 scripts/setup_submodules.sh）",
+)
 def test_engine_query_qimen_graceful_skip():
     resp = client.post(
         "/api/engine/qimen",

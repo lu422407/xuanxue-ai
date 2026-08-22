@@ -1,7 +1,10 @@
 """AIOrchestrator 端到端测试（离线确定性，llm=None / FakeLLM）。"""
 
+import pytest
+
 from agents.ai_orchestrator import AIOrchestrator, SynthesisResult
 from agents.guardrails import DISCLAIMER
+from engines import zhouyi_bridge
 from tests.fake_llm import FakeLLM
 
 
@@ -103,6 +106,10 @@ def test_qimen_and_liuyao_graceful_skip():
     assert "liuyao" in skipped2
 
 
+@pytest.mark.skipif(
+    not zhouyi_bridge.cli_available(),
+    reason="ZhouYiLab CLI 未编译，奇门链路不可用（编译步骤见 scripts/setup_submodules.sh）",
+)
 def test_run_single_bazi_and_qimen():
     orch = _orch()
     ok = orch.run_single("bazi", {
