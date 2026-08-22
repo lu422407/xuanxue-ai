@@ -1,13 +1,14 @@
 # CI：全量 pytest + 覆盖率红线（README 要求 >80%）
-# 说明：奇门/六爻依赖的 ZhouYiLab C++ CLI 不在 CI 内编译（耗时且需 LLVM），
-# 相关测试带 skipif 会自动跳过，不产生假失败。六壬引擎运行时依赖
-# dalurenpython 子模块（代码内 sys.path 引用，非 pip 包），需检出该子模块。
+# - test   ：纯 Python 链路（不编译 C++，奇门/六爻测试自动 skip）
+# - cpp-cli：编译 ZhouYiLab CLI（Linux LLVM/libc++）后跑全量测试，
+#            奇门/六爻链路真实执行，防止 C++ 侧回归被 skip 掩盖
 name: CI
 
 on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -32,3 +33,49 @@ jobs:
 
       - name: 测试（含覆盖率红线 80%）
         run: pytest --cov --cov-fail-under=80
+
+  cpp-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检出所需子模块（ZhouYiLab + dalurenpython）
+        run: git submodule update --init third_party/ZhouYiLab third_party/dalurenpython
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安装 Python 依赖与构建工具
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt cmake ninja
+          pip install astropy
+          pip install git+https://github.com/wlhyl/ganzhiwuxinForPython.git
+
+      - name: 安装 LLVM 20（libc++ 工具链）
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lsb-release wget gnupg
+          wget -q https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 20
+          sudo apt-get install -y libc++-20-dev libc++abi-20-dev
+          clang++-20 --version
+
+      - name: 编译 ZhouYiLab CLI（example_zhouyi_cli）
+        run: |
+          cd third_party/ZhouYiLab
+          cmake -B build_ci -G Ninja \
+            -DCMAKE_C_COMPILER=clang-20 \
+            -DCMAKE_CXX_COMPILER=clang++-20 \
+            -DBUILD_EXAMPLES=ON \
+            -DZHOUYILAB_MODULE_MODE=LOCAL \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build_ci --target example_zhouyi_cli
+
+      - name: 全量测试（奇门/六爻真实链路）
+        env:
+          ZHOUEYILAB_CLI: ${{ github.workspace }}/third_party/ZhouYiLab/build_ci/examples/example_zhouyi_cli
+        run: pytest -q
