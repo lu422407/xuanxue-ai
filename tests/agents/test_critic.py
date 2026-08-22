@@ -48,3 +48,92 @@ def test_safety_absolutism():
     critic = Critic()
     issues = critic.check_safety("我保证您明年一定发财")
     assert issues
+
+# ---- 奇门 / 六爻 / 六壬声称校验 ----
+
+QM_BIRTH = {
+    "birth_datetime": "2024-03-05 10:00:00",
+    "timezone_offset": 8, "calendar": "solar", "gender": "男",
+}
+
+
+def _qimen_chart():
+    from engines.qimen_engine import QiMenEngine
+    from engines import zhouyi_bridge
+    if not zhouyi_bridge.cli_available():
+        return None
+    return QiMenEngine().calculate(dict(QM_BIRTH))
+
+
+def test_detects_fake_qimen_star_and_gate():
+    chart = _qimen_chart()
+    if chart is None:
+        import pytest
+        pytest.skip("ZhouYiLab CLI 未编译")
+    # 2024-03-05 盘面实际有天英/休门（北宫），天禽不临宫、开门在西北
+    actual_stars = {p["star"] for p in chart["palaces"]}
+    fake_star = next(s for s in ("天禽", "天辅", "天冲") if s not in actual_stars)
+    draft = f"本盘{fake_star}临宫，且开门大吉，宜行动。"
+    # 开门是否在盘中需动态判断，星曜断言是主目标
+    report = Critic().validate(draft, {"qimen": chart})
+    assert not report.passed
+    assert any(fake_star in i and "不符" in i for i in report.issues)
+
+
+def test_qimen_consistent_text_passes():
+    chart = _qimen_chart()
+    if chart is None:
+        import pytest
+        pytest.skip("ZhouYiLab CLI 未编译")
+    palace = chart["palaces"][0]
+    draft = f"本盘{palace['palace_name']}方{palace['star']}星、{palace['gate']}门。"
+    report = Critic().validate(draft, {"qimen": chart})
+    assert report.passed, report.issues
+
+
+def _liuyao_chart():
+    from engines.liuyao_engine import LiuYaoEngine
+    from engines import zhouyi_bridge
+    if not zhouyi_bridge.cli_available():
+        return None
+    inp = dict(QM_BIRTH)
+    inp["main_hexagram_code"] = "111111"
+    return LiuYaoEngine().calculate(inp)
+
+
+def test_detects_fake_liuyao_spirit_and_relative():
+    chart = _liuyao_chart()
+    if chart is None:
+        import pytest
+        pytest.skip("ZhouYiLab CLI 未编译")
+    # 人为注入错误：初爻实际临勾陈，声称初爻临青龙（六神按爻位轮排，须校验位置对应）
+    actual_first = chart["yao"][0]["spirit"]
+    fake_spirit = next(s for s in ("青龙", "朱雀", "白虎", "螣蛇") if s != actual_first)
+    draft = f"初爻{fake_spirit}持世，动而有变。"
+    report = Critic().validate(draft, {"liuyao": chart})
+    assert not report.passed
+    assert any(fake_spirit in i and "六神" in i for i in report.issues)
+
+
+def test_liuyao_consistent_text_passes():
+    chart = _liuyao_chart()
+    if chart is None:
+        import pytest
+        pytest.skip("ZhouYiLab CLI 未编译")
+    y = chart["yao"][0]
+    ganzhi = y["mainPillar"]["stem"] + y["mainPillar"]["branch"]
+    draft = f"初爻纳甲{ganzhi}，{y['spirit']}临之。"
+    report = Critic().validate(draft, {"liuyao": chart})
+    assert report.passed, report.issues
+
+
+def test_detects_fake_liuren_yuejiang():
+    from engines.liuren_engine import LiuRenEngine
+    inp = dict(QM_BIRTH)
+    inp["divination_datetime"] = "2024-03-05 10:00:00"
+    chart = LiuRenEngine().calculate(inp)
+    actual = chart["月将"]
+    fake = next(z for z in "子丑寅卯辰巳午未申酉戌亥" if z != actual)
+    report = Critic().validate(f"本月将为{fake}，课体已定。", {"liuren": chart})
+    assert not report.passed
+    assert any("月将" in i for i in report.issues)

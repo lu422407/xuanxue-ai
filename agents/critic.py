@@ -22,6 +22,19 @@ ZIWEI_MAJOR_STARS = {
 BAZI_GAN = "甲乙丙丁戊己庚辛壬癸"
 BAZI_ZHI = "子丑寅卯辰巳午未申酉戌亥"
 
+# 奇门九星 / 八门 / 八神（宫位 JSON 中 star/gate/spirit 字段的取值域）
+QIMEN_STARS = {
+    "天蓬", "天芮", "天冲", "天辅", "天禽", "天心", "天柱", "天任", "天英",
+}
+QIMEN_GATES = {"休门", "生门", "伤门", "杜门", "景门", "死门", "惊门", "开门"}
+QIMEN_SPIRITS = {
+    "直符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天",
+}
+
+# 六爻六神 / 六亲（yao 列表 spirit / mainRelative 等字段的取值域）
+LIUYAO_SPIRITS = {"青龙", "朱雀", "勾陈", "螣蛇", "白虎", "玄武"}
+LIUYAO_RELATIVES = {"兄弟", "子孙", "妻财", "官鬼", "父母"}
+
 
 @dataclass
 class ValidationReport:
@@ -40,6 +53,12 @@ class Critic:
                 issues += self._check_ziwei(draft_answer, chart)
             elif system == "bazi":
                 issues += self._check_bazi(draft_answer, chart)
+            elif system == "qimen":
+                issues += self._check_qimen(draft_answer, chart)
+            elif system == "liuyao":
+                issues += self._check_liuyao(draft_answer, chart)
+            elif system == "liuren":
+                issues += self._check_liuren(draft_answer, chart)
         return ValidationReport(passed=not issues, issues=issues)
 
     # ---- Chart Validator ----
@@ -86,6 +105,81 @@ class Critic:
         for m in matches:
             if m not in valid_ganzhi:
                 issues.append(f"干支声称不符：'{m}' 不在本八字四柱中")
+        return issues
+
+    def _check_qimen(self, text: str, chart: Dict[str, Any]) -> List[str]:
+        """奇门声称校验：九星 / 八门 / 八神必须真实存在于本盘宫位。"""
+        palaces = chart.get("palaces") or []
+        actual_stars = {p.get("star") for p in palaces if p.get("star")}
+        actual_gates = {p.get("gate") for p in palaces if p.get("gate")}
+        actual_spirits = {p.get("spirit") for p in palaces if p.get("spirit")}
+
+        issues: List[str] = []
+        for star in QIMEN_STARS:
+            if star in text and star not in actual_stars:
+                issues.append(f"九星声称不符：'{star}' 不在本奇门盘任何宫位")
+        for gate in QIMEN_GATES:
+            # 文本通常写"开门"，盘面字段值为单字"开"
+            if gate in text and gate[:-1] not in actual_gates:
+                issues.append(f"八门声称不符：'{gate}' 不在本奇门盘任何宫位")
+        for spirit in QIMEN_SPIRITS:
+            if spirit in text and spirit not in actual_spirits:
+                issues.append(f"八神声称不符：'{spirit}' 不在本奇门盘任何宫位")
+        return issues
+
+    def _check_liuyao(self, text: str, chart: Dict[str, Any]) -> List[str]:
+        """六爻声称校验：爻位-六神对应 / 六亲（X爻形式）/ 纳甲干支。
+
+        六神按日干起排且六个爻位轮转覆盖全部六神，全局存在性校验无意义，
+        必须校验"X爻临Y"的位置对应关系。
+        """
+        yaos = chart.get("yao") or []
+        if isinstance(yaos, dict):
+            yaos = list(yaos.values())
+
+        actual_relatives = set()
+        actual_ganzhi = set()
+        for y in yaos:
+            for rel_key in ("mainRelative", "hiddenRelative", "changedRelative"):
+                if y.get(rel_key):
+                    actual_relatives.add(y[rel_key])
+            for pil_key in ("mainPillar", "hiddenPillar", "changedPillar"):
+                pil = y.get(pil_key) or {}
+                if pil.get("stem") and pil.get("branch"):
+                    actual_ganzhi.add(pil["stem"] + pil["branch"])
+
+        issues: List[str] = []
+        # 1) 爻位-六神对应（yao 列表自下而上：初爻→上爻）
+        pos_words = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"]
+        spirits_re = "|".join(sorted(LIUYAO_SPIRITS, key=len, reverse=True))
+        for i, pos in enumerate(pos_words):
+            m = re.search(rf"{pos}[^。；，！？]*?({spirits_re})", text)
+            if m and i < len(yaos):
+                actual = yaos[i].get("spirit")
+                if actual and m.group(1) != actual:
+                    issues.append(
+                        f"六神声称不符：{pos}实际临'{actual}'，文中称'{m.group(1)}'"
+                    )
+        # 2) 六亲：仅校验"父母爻"这类明确指称，避免日常用语误伤
+        for rel in LIUYAO_RELATIVES:
+            if f"{rel}爻" in text and rel not in actual_relatives:
+                issues.append(f"六亲声称不符：本卦没有'{rel}爻'")
+        # 3) 纳甲干支
+        for m in re.findall(rf"[{BAZI_GAN}][{BAZI_ZHI}]", text):
+            if m not in actual_ganzhi:
+                issues.append(f"纳甲干支声称不符：'{m}' 不在本卦纳甲中")
+        return issues
+
+    def _check_liuren(self, text: str, chart: Dict[str, Any]) -> List[str]:
+        """六壬声称校验（轻量）：月将声称必须与本盘一致。"""
+        actual_yuejiang = chart.get("月将")
+        issues: List[str] = []
+        if actual_yuejiang:
+            m = re.search(rf"月将[为是]?\s*([{BAZI_ZHI}])", text)
+            if m and m.group(1) != actual_yuejiang:
+                issues.append(
+                    f"月将声称不符：'{m.group(1)}' 与本盘月将 '{actual_yuejiang}' 不一致"
+                )
         return issues
 
     # ---- Logic Validator ----
