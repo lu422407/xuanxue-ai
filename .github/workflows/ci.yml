@@ -1,6 +1,7 @@
 # CI：全量 pytest + 覆盖率红线（README 要求 >80%）
 # 说明：奇门/六爻依赖的 ZhouYiLab C++ CLI 不在 CI 内编译（耗时且需 LLVM），
-# 相关测试带 skipif 会自动跳过，不产生假失败。knowledge/ 已入库，无需 submodules。
+# 相关测试带 skipif 会自动跳过，不产生假失败。六壬引擎运行时依赖
+# dalurenpython 子模块（代码内 sys.path 引用，非 pip 包），需检出该子模块。
 name: CI
 
 on:
@@ -13,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: 检出六壬引擎所需子模块
+        run: git submodule update --init third_party/dalurenpython
 
       - uses: actions/setup-python@v5
         with:
