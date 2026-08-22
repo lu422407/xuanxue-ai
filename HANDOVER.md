@@ -116,8 +116,8 @@ cd ../..
 
 ## 5. 接手人下一步行动（按优先级）
 
-### 🟢 优先级 1：Phase C 真实条文扩充
-`knowledge/tieban/tiaowen/` 仍是占位样本。**2026-08-22 决定：占位条文的 `verified:true` 翻转已 revert**——占位数据不得标记为"已验证传统文献"，扩充时须逐条核对真实流传本并补 `source`。**此步需要真实素材输入，不得由 AI 编造条文内容。**
+### 🟢 优先级 1：铁板真实条文 → ✅ 已完成（2026-08-22 第四批）
+GitHub 上找到完整素材并全量导入：**12,000 条清代公版条文**（溯源链 xaminxan/tiebanshenshu → Nanphy/TiebanshenshuOS → hackninety/tbss-ts-lib，全部锁定 commit），分布在 `knowledge/tieban/tiaowen/tiaowen_real_*.json`（12 卷）。三个注意点：**① 许可 CC BY-NC 4.0，项目转商用前必须移除或另获授权；② (ke,fen) 刻分索引自建（确定性规则，80 槽×150 条），非传统考刻取数，真实取数表已在上游备齐待决策接入；③ category 为关键词自动归类**。溯源细节见该目录 `SOURCES.md`。测试基线 202 → **12,202**（逐条 schema 参数化校验）。
 
 ### 🟢 优先级 2：validator 强化
 - `validate_ziwei` 亮度校验在字符串契约下空转（见 §4.3）
@@ -147,7 +147,7 @@ cd ../..
 
 ## 6. 项目核心约束（任何修改必须遵守）
 
-1. **不删除/削弱任何现有测试**（当前 202 测试基线不可退化）
+1. **不删除/削弱任何现有测试**（当前 12,202 测试基线不可退化——含 12,000 条真实条文逐条 schema 校验）
 2. **LLM 不负责计算**（只在 Explain 阶段使用，所有排盘由 `engines/*` 确定性完成）
 3. **不引入不可追踪的大型依赖**（仅用已锁定的 requirements.txt + submodule）
 4. **不修改 tieban_engine 核心算法**（条文库是数据驱动，与算法解耦）

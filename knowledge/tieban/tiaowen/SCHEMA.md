@@ -11,16 +11,29 @@
 ```
 knowledge/tieban/tiaowen/
 ├── SCHEMA.md                  # 本规范
+├── SOURCES.md                 # 真实条文溯源链与许可约束（CC BY-NC 4.0，禁止商用）
 ├── tiaowen_sample.json        # 示例条文（占位，非真实流传本）
-├── tiaowen_<主题>.json        # 后续按主题拆分的真实条文集（建议每个文件一个数组）
+├── tiaowen_extended.json      # 扩充样本（占位，非真实流传本）
+├── tiaowen_real_<集>.json     # 真实条文集（12 卷 × 1000 条，见 SOURCES.md）
 └── (可选) kefen_traits.json   # ⚠️ 见 §5 约束，切勿与本目录条文混放
 ```
 
 - 每个 `.json` 文件的内容**要么是条文数组 `[ ... ]`，要么是一条单独条文对象 `{ ... }`**。
   `TieBanEngine._load_tiaowen` 两种形态都兼容。
-- 文件名自由，但只识别 `*.json`。`SCHEMA.md` / `*.md` 不会被加载。
+- 文件名自由，但只识别 `*.json`。`SCHEMA.md` / `SOURCES.md` / `*.md` 不会被加载。
 - 建议按主题/卷册拆分文件（如 `tiaowen_parents.json`、`tiaowen_siblings.json`），
   便于多人协作与增量更新，避免单文件过大。
+
+### 真实条文集（tiaowen_real_*.json）
+
+- 共 12,000 条（原文号 1001–13000），正文为清代公版古籍的社区数字化转录，
+  溯源链与保真度声明见 `SOURCES.md`；`meta.verified=true` 指"正文为传统流传条文"，
+  非逐字校勘完成（confidence=中）。
+- **刻分归属为本项目自建确定性索引**：`idx=条文号-1001; ke=idx%8; fen=(idx//8)%10`
+  （80 槽 × 每槽 150 条）。这是接入临时方案——实现真实考刻取数算法
+  （十四考取数表已在溯源上游 tbss-ts-lib 提供）后应整体替换。
+- `category` 为关键词自动归类（父母>兄弟>夫妻>子女>流年>自身），非原文分类。
+- **许可：CC BY-NC 4.0，禁止商用**；使用须保留 SOURCES.md 溯源链。
 
 ---
 

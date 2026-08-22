@@ -10,6 +10,7 @@
 
 | # | 原问题 | 解决方式 |
 |---|--------|----------|
+| 0 | 铁板神数无真实条文（原列四档"需素材"） | **素材已在 GitHub 找到并全量导入**：12,000 条清代公版条文（溯源链 xaminxan→Nanphy→tbss-ts-lib，锁定 commit），`knowledge/tieban/tiaowen/tiaowen_real_*.json`，溯源与许可见该目录 SOURCES.md。**注意：①CC BY-NC 4.0 禁止商用；②ke/fen 为本项目自建索引（规则见 SCHEMA.md §1），非传统考刻取数；③分类为关键词自动归类** |
 | 1 | 黄金测试只盖 bazi/ziwei（2/6 引擎），"准确性红线"对其余引擎为空 | 补齐 qimen×2 / liuyao×2 / liuren×1 / tieban×1 黄金用例（奇门用例与 demo 程序输出交叉验证一致：阳遁9局/天蓬/休）；qimen/liuyao 无 CLI 时 skip，CI cpp job 强制真跑 |
 | 2 | Critic 防幻觉只护紫微+八字，四系统编造不被抓 | 扩展 `_check_qimen`（九星/八门/八神）、`_check_liuyao`（爻位-六神对应/六亲爻/纳甲干支）、`_check_liuren`（月将）；注意六神按爻位轮排全覆盖，全局存在性校验无意义，已用位置校验 |
 | 3 | 新编排链路零 trace，Phase F"8 span"名存实亡 | `ai_orchestrator.run()` 全部 8 阶段接 `tracer.span()`，trace_id 缺省自动生成；`cost_tracker` 记录 engines / rag_searches / llm_calls（仅 LLM 真实成功时计） |
@@ -39,7 +40,7 @@
 
 ## 四、受约束暂不可解决
 
-1. **铁板神数真实条文**：需真实流传本素材，AI 不得编造条文内容（2026-08-22 已 revert 一次占位数据翻 verified 的尝试）。素材到位前 `verified:false` 是唯一诚实状态。
+1. **铁板神数真实条文的"传统考刻取数"接入**：真实条文已入库（见一档 #0），但 (ke,fen)→条文 的映射仍为自建索引；实现真实取数需按十四考取数表重写引擎路径（受"不修改 tieban_engine 核心算法"约束，需单独决策），取数表与文献已在溯源上游备齐。
 2. **RAG 真语义向量**：离线确定性红线与本地 embedding 模型依赖冲突；哈希向量 + bigram 是当前约束下的设计取舍，知识库扩大后检索质量会受限。
 3. **Apple Silicon pythonmonkey**：无 arm64 机器可验证；紫微链路在该平台可能不可用，需备选方案。
 4. **CI 首轮运行的环境注入抖动**：已观察一次（env 设置但测试进程未见到），加"skip 即失败"保险后无害化，根因在 GitHub runner 侧无法进一步定位。
