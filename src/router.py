@@ -182,11 +182,11 @@ class XuanXueRouter:
 
     def _get_setup_hint(self, method: str) -> str:
         hints = {
-            "紫微斗数": "pip install py-iztro",
-            "大六壬": "编译 ZhouYiLab: cd third_party/ZhouYiLab && cmake -B build && cmake --build build",
-            "八字": "同上",
+            "紫微斗数": "pip install py-iztro pythonmonkey（见 requirements.txt）",
+            "大六壬": "pip install -r requirements.txt（eacal/astropy 等）",
+            "八字": "pip install -r requirements.txt（sxtwl/ganzhiwuxin，见 README）",
             "铁板神数": "准备条文库: knowledge/tieban/tiaowen/",
-            "奇门遁甲": "编译 ZhouYiLab",
-            "六爻": "编译 ZhouYiLab",
+            "奇门遁甲": "编译 ZhouYiLab CLI（bash scripts/setup_submodules.sh 或 docs/ZHOUEYILAB_BUILD_GUIDE.md）",
+            "六爻": "编译 ZhouYiLab CLI（bash scripts/setup_submodules.sh 或 docs/ZHOUEYILAB_BUILD_GUIDE.md）",
         }
         return hints.get(method, "请检查子模块")

@@ -9,7 +9,7 @@
 
 ## 0. 一句话结论
 
-六个引擎（八字/紫微/六壬/铁板/奇门/六爻）**全部接入完毕并可运行**；全量 pytest **181 个测试全绿**（无 ZhouYiLab CLI 时其中 2 个奇门链路测试自动 skip，不会 fail）。2026-08-21 版交接文档中"引擎未接入、需编译 example_qi_men/liu_yao"的说法已过时——实际接入方式是 `example_zhouyi_cli`（JSON 子命令 CLI），其 clang 模块可见性缺陷已修复并推送 fork。剩余工作只有 Phase C/E/F 扩展（真实条文库、RAG 溯源、可观测性）。
+六个引擎（八字/紫微/六壬/铁板/奇门/六爻）**全部接入完毕并可运行**；编排层 Phase A–E 已完成（含五行交叉印证与 RAG 古籍引用溯源）；全量 pytest **186 个测试全绿**，覆盖率 **83%**（红线 >80%，CI 已强制执行）。无 ZhouYiLab CLI 时奇门链路测试自动 skip。剩余工作：真实条文库（需素材）、validator 亮度校验、Docker 内 CLI、LLM 真接入、用户成长助手。
 
 ---
 
@@ -71,7 +71,8 @@ cmake --build build_llvm --target example_zhouyi_cli   # 只需这一个目标
 
 # 4. 测试
 cd ../..
-.venv/bin/pytest -q    # 期望 181 passed（未编译 CLI 时 179 passed + 2 skipped）
+.venv/bin/pytest -q                    # 期望 186 passed（未编译 CLI 时 184 passed + 2 skipped）
+.venv/bin/pytest --cov --cov-fail-under=80   # 覆盖率红线（CI 同款命令）
 ```
 
 ### 3.2 Windows（用户原开发机）
@@ -116,26 +117,29 @@ cd ../..
 ## 5. 接手人下一步行动（按优先级）
 
 ### 🟢 优先级 1：Phase C 真实条文扩充
-`knowledge/tieban/tiaowen/` 仍是占位样本。**2026-08-22 决定：占位条文的 `verified:true` 翻转已 revert**——占位数据不得标记为"已验证传统文献"，扩充时须逐条核对真实流传本并补 `source`。
+`knowledge/tieban/tiaowen/` 仍是占位样本。**2026-08-22 决定：占位条文的 `verified:true` 翻转已 revert**——占位数据不得标记为"已验证传统文献"，扩充时须逐条核对真实流传本并补 `source`。**此步需要真实素材输入，不得由 AI 编造条文内容。**
 
 ### 🟢 优先级 2：validator 强化
 - `validate_ziwei` 亮度校验在字符串契约下空转（见 §4.3）
 - `validate_liuren` 仍是骨架（四课三传规则未实现）
 
-### 🟢 优先级 3：Phase E/F（RAG 溯源 + 可观测性）
-`rag/retriever`、`observability/tracing`、`cost_tracker` 已有骨架，接入 `synthesis.citations` 填充古籍引用。
+### 🟢 优先级 3：LLM 真实接入 + 用户成长助手
+`llm/` 四个 provider 壳齐备但生产入口用 RuleBasedLLM；README 定位的"用户成长助手"仅有 memory 骨架。
 
 ### 🟢 优先级 4：其他待办
-- 无 CI 配置（建议加 GitHub Actions：pytest + 二进制预编译缓存）
-- `agents/ai_orchestrator.py` 的 `except NotImplementedError` 分支已成死代码（引擎现抛 EngineError），可在下次重构时清理
-- `src/router.py` `_get_setup_hint` 的八字/六壬提示文案不准确（它们是纯 Python 引擎）
 - Docker 镜像未包含 ZhouYiLab CLI，奇门/六爻在容器内不可用（其余功能正常）
+- `src/router.py` `_extract_params` 的 hour 提取顺序问题（审计报告遗留，低风险）
+
+### 已完成（2026-08-22 第二批）
+- ✅ Phase B：八字日主↔紫微命宫五行生克交叉印证（`cross_validate_bazi_ziwei` 纯函数 + 单测）
+- ✅ Phase E：RAG 溯源接入编排层（`synthesis.citations` 填充可校验的 `[source:id]` 引用，附于答案）
+- ✅ coverage 工具（`.coveragerc` + pytest-cov）与 GitHub Actions CI（`.github/workflows/ci.yml`，覆盖率红线 80%）
 
 ---
 
 ## 6. 项目核心约束（任何修改必须遵守）
 
-1. **不删除/削弱任何现有测试**（当前 181 测试基线不可退化）
+1. **不删除/削弱任何现有测试**（当前 186 测试基线不可退化）
 2. **LLM 不负责计算**（只在 Explain 阶段使用，所有排盘由 `engines/*` 确定性完成）
 3. **不引入不可追踪的大型依赖**（仅用已锁定的 requirements.txt + submodule）
 4. **不修改 tieban_engine 核心算法**（条文库是数据驱动，与算法解耦）
