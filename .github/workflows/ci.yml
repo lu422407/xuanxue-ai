@@ -77,5 +77,5 @@ jobs:
 
       - name: 全量测试（奇门/六爻真实链路）
         env:
-          ZHOUEYILAB_CLI: ${{ github.workspace }}/third_party/ZhouYiLab/build_ci/examples/example_zhouyi_cli
-        run: pytest -q
+          ZHOUYILAB_CLI: ${{ github.workspace }}/third_party/ZhouYiLab/build_ci/examples/example_zhouyi_cli
+        run: pytest -q -rs
