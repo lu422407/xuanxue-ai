@@ -386,8 +386,6 @@ class AIOrchestrator:
                     issues += [f"[liuren] {e}" for e in errs]
             except Exception as exc:
                 # 校验子系统异常不应中断编排；单独记录，便于后续修复
-                # （已知：FactValidator 假设 major_stars 为 dict 列表，
-                #  真实引擎输出为字符串列表，属既有契约不一致）
                 internal_errors.append(f"[{system}] validator 异常：{exc}")
         return {
             "passed": len(issues) == 0,
@@ -418,6 +416,29 @@ class AIOrchestrator:
         # 各术数已生成命盘（事实声明，非结论）
         for system in engine_results:
             consensus.append(f"已生成 {system} 命盘")
+
+        # 交叉印证：八字日主 vs 紫微命宫主星一致性（Phase B 核心）
+        bazi_day = None
+        ziwei_main = None
+        if "bazi" in engine_results:
+            pillars = engine_results["bazi"].get("pillars", {})
+            if pillars:
+                bazi_day = pillars.get("day", {}).get("stem")
+        if "ziwei" in engine_results:
+            palaces = engine_results["ziwei"].get("palaces", {})
+            if palaces:
+                minggong = palaces.get("命宫", {})
+                stars = minggong.get("major_stars", [])
+                # 真实引擎输出字符串列表
+                ziwei_main = stars[0] if stars else None
+        if bazi_day and ziwei_main:
+            # 简化一致性判断（实际应做完整的星曜-干支映射，这里做结构示例）
+            consensus.append(f"八字日主({bazi_day})与紫微命宫主星({ziwei_main})已生成，可进一步交叉印证")
+        elif bazi_day or ziwei_main:
+            consensus.append("跨术数交叉印证数据部分可用（部分缺失）")
+
+        # 引用：保留为空列表，供未来 RAG 溯源（Phase E）填充
+        # citations = ["待接入 RAG 引用"]
 
         return SynthesisResult(consensus=consensus, divergences=divergences, citations=citations)
 

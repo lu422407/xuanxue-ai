@@ -46,8 +46,13 @@ class FactValidator:
         for palace_name, palace in chart.get("palaces", {}).items():
             position = palace.get("position", "")
             for star in palace.get("major_stars", []):
-                star_name = star.get("name", "")
-                brightness = star.get("brightness", "")
+                # 修复契约：真实引擎输出字符串列表（非 dict），默认亮度=平
+                if isinstance(star, str):
+                    star_name = star
+                    brightness = "平"
+                else:
+                    star_name = star.get("name", "")
+                    brightness = star.get("brightness", "")
                 if star_name not in ZIWEI_BRIGHTNESS:
                     continue
                 valid = ZIWEI_BRIGHTNESS[star_name]
