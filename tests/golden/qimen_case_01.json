@@ -1,0 +1,143 @@
+{
+  "expected": {
+    "ba_zi": {
+      "day": {
+        "branch": "辰",
+        "stem": "甲"
+      },
+      "hour": {
+        "branch": "寅",
+        "stem": "丙"
+      },
+      "month": {
+        "branch": "午",
+        "stem": "甲"
+      },
+      "xun_kong_1": "寅",
+      "xun_kong_2": "卯",
+      "year": {
+        "branch": "卯",
+        "stem": "辛"
+      }
+    },
+    "description": "奇门遁甲排盘\n节气: 芒种\n阴阳遁: 阳遁\n三元: 下元\n局数: 9\n直符: 天蓬\n直使: 休\n\n══════════════════════════\n九宫排盘：\n══════════════════════════\n║西北天辅║北  天英║东北天芮║\n║ 开     ║ 休     ║ 生     ║\n║ 九天   ║ 直符   ║ 腾蛇   ║\n║地:辛    ║地:壬    ║地:癸    ║\n║天:丙    ║天:戊    ║天:己    ║\n╠════════╬════════╬════════╣\n║西  天冲║中  天任║东  天柱║\n║ 惊     ║ 未知   ║ 伤     ║\n║ 九地   ║ 直符   ║ 太阴   ║\n║地:庚    ║地:己    ║地:丁    ║\n║天:丁    ║天:癸    ║天:庚    ║\n╠════════╬════════╬════════╣\n║西南天任║南  天蓬║东南天心║\n║ 死     ║ 景     ║ 杜     ║\n║ 玄武   ║ 白虎   ║ 六合   ║\n║地:己    ║地:戊    ║地:丙    ║\n║天:癸    ║天:壬    ║天:辛    ║\n══════════════════════════\n",
+    "dun": "yang",
+    "dun_zh": "阳遁",
+    "input_echo": {
+      "birth_datetime": "2011-06-18 03:56:00",
+      "calendar": "solar",
+      "gender": "男",
+      "timezone_offset": 8.0
+    },
+    "ju": 9,
+    "lunar_date": {
+      "day": 17,
+      "is_leap_month": false,
+      "month": 5,
+      "year": 2011
+    },
+    "palaces": [
+      {
+        "di_gan": "壬",
+        "gate": "休",
+        "palace_name": "北",
+        "palace_num": 1,
+        "spirit": "直符",
+        "star": "天英",
+        "tian_gan": "戊"
+      },
+      {
+        "di_gan": "己",
+        "gate": "死",
+        "palace_name": "西南",
+        "palace_num": 2,
+        "spirit": "玄武",
+        "star": "天任",
+        "tian_gan": "癸"
+      },
+      {
+        "di_gan": "丁",
+        "gate": "伤",
+        "palace_name": "东",
+        "palace_num": 3,
+        "spirit": "太阴",
+        "star": "天柱",
+        "tian_gan": "庚"
+      },
+      {
+        "di_gan": "丙",
+        "gate": "杜",
+        "palace_name": "东南",
+        "palace_num": 4,
+        "spirit": "六合",
+        "star": "天心",
+        "tian_gan": "辛"
+      },
+      {
+        "di_gan": "己",
+        "gate": "未知",
+        "palace_name": "中",
+        "palace_num": 5,
+        "spirit": "直符",
+        "star": "天任",
+        "tian_gan": "癸"
+      },
+      {
+        "di_gan": "辛",
+        "gate": "开",
+        "palace_name": "西北",
+        "palace_num": 6,
+        "spirit": "九天",
+        "star": "天辅",
+        "tian_gan": "丙"
+      },
+      {
+        "di_gan": "庚",
+        "gate": "惊",
+        "palace_name": "西",
+        "palace_num": 7,
+        "spirit": "九地",
+        "star": "天冲",
+        "tian_gan": "丁"
+      },
+      {
+        "di_gan": "癸",
+        "gate": "生",
+        "palace_name": "东北",
+        "palace_num": 8,
+        "spirit": "腾蛇",
+        "star": "天芮",
+        "tian_gan": "己"
+      },
+      {
+        "di_gan": "戊",
+        "gate": "景",
+        "palace_name": "南",
+        "palace_num": 9,
+        "spirit": "白虎",
+        "star": "天蓬",
+        "tian_gan": "壬"
+      }
+    ],
+    "solar_date": {
+      "day": 18,
+      "hour": 3,
+      "month": 6,
+      "year": 2011
+    },
+    "solar_term": "芒种",
+    "system": "qimen",
+    "yuan": "xia",
+    "yuan_zh": "下元",
+    "zhi_fu_palace": "北",
+    "zhi_fu_star": "天蓬",
+    "zhi_shi_gate": "休"
+  },
+  "input": {
+    "birth_datetime": "2011-06-18 03:56:00",
+    "calendar": "solar",
+    "gender": "男",
+    "timezone_offset": 8
+  },
+  "system": "qimen"
+}

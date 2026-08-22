@@ -1,0 +1,267 @@
+{
+  "expected": {
+    "all_candidates": [
+      {
+        "fen": 0,
+        "ke": 2,
+        "score": 0.33
+      },
+      {
+        "fen": 1,
+        "ke": 2,
+        "score": 0.33
+      },
+      {
+        "fen": 2,
+        "ke": 2,
+        "score": 0.33
+      },
+      {
+        "fen": 3,
+        "ke": 2,
+        "score": 0.33
+      },
+      {
+        "fen": 4,
+        "ke": 2,
+        "score": 0.33
+      }
+    ],
+    "base_chart": {
+      "body": {
+        "palace": "酉",
+        "star": "火星"
+      },
+      "engine_version": "0.1.0",
+      "input_echo": {
+        "birth_datetime": "1990-05-01 08:30:00",
+        "calendar": "solar",
+        "chinese_date": "庚午 庚辰 丙寅 壬辰",
+        "gender": "男",
+        "lunar": {
+          "has_jieqi": false,
+          "is_lunar_leap": false,
+          "jieqi": null,
+          "lunar_day": 7,
+          "lunar_month": 4,
+          "lunar_year": 1990
+        },
+        "lunar_date": "一九九〇年四月初七",
+        "school": "zhongzhou",
+        "timezone_offset": 8.0,
+        "true_solar_time_applied": false
+      },
+      "palaces": {
+        "仆役": {
+          "adopted_stars": [
+            "封诰",
+            "天福",
+            "截路",
+            "天伤"
+          ],
+          "major_stars": [
+            "武曲",
+            "天府"
+          ],
+          "minor_stars": [
+            "文昌"
+          ],
+          "mutagen": null,
+          "position": "午"
+        },
+        "兄弟": {
+          "adopted_stars": [
+            "天刑",
+            "天哭",
+            "天虚"
+          ],
+          "major_stars": [
+            "七杀"
+          ],
+          "minor_stars": [],
+          "mutagen": null,
+          "position": "子"
+        },
+        "命宫": {
+          "adopted_stars": [
+            "三台",
+            "八座",
+            "天贵"
+          ],
+          "major_stars": [],
+          "minor_stars": [
+            "天魁"
+          ],
+          "mutagen": null,
+          "position": "丑"
+        },
+        "夫妻": {
+          "adopted_stars": [
+            "恩光",
+            "天巫",
+            "天官",
+            "月德"
+          ],
+          "major_stars": [
+            "天梁"
+          ],
+          "minor_stars": [],
+          "mutagen": null,
+          "position": "亥"
+        },
+        "子女": {
+          "adopted_stars": [
+            "解神",
+            "龙池",
+            "台辅",
+            "华盖",
+            "旬空"
+          ],
+          "major_stars": [
+            "紫微",
+            "天相"
+          ],
+          "minor_stars": [],
+          "mutagen": null,
+          "position": "戌"
+        },
+        "官禄": {
+          "adopted_stars": [
+            "破碎"
+          ],
+          "major_stars": [
+            "天同"
+          ],
+          "minor_stars": [
+            "火星"
+          ],
+          "mutagen": null,
+          "position": "巳"
+        },
+        "父母": {
+          "adopted_stars": [
+            "天厨",
+            "天月",
+            "蜚廉"
+          ],
+          "major_stars": [
+            "廉贞"
+          ],
+          "minor_stars": [],
+          "mutagen": null,
+          "position": "寅"
+        },
+        "田宅": {
+          "adopted_stars": [
+            "天姚",
+            "凤阁",
+            "寡宿",
+            "年解"
+          ],
+          "major_stars": [
+            "破军"
+          ],
+          "minor_stars": [],
+          "mutagen": null,
+          "position": "辰"
+        },
+        "疾厄": {
+          "adopted_stars": [
+            "孤辰",
+            "阴煞",
+            "天使"
+          ],
+          "major_stars": [
+            "贪狼"
+          ],
+          "minor_stars": [
+            "文曲",
+            "禄存",
+            "天马"
+          ],
+          "mutagen": null,
+          "position": "申"
+        },
+        "福德": {
+          "adopted_stars": [
+            "天喜",
+            "咸池",
+            "天寿",
+            "天德"
+          ],
+          "major_stars": [],
+          "minor_stars": [
+            "地劫"
+          ],
+          "mutagen": null,
+          "position": "卯"
+        },
+        "财帛": {
+          "adopted_stars": [
+            "红鸾"
+          ],
+          "major_stars": [
+            "天机",
+            "巨门"
+          ],
+          "minor_stars": [
+            "擎羊"
+          ],
+          "mutagen": null,
+          "position": "酉"
+        },
+        "迁移": {
+          "adopted_stars": [
+            "天才",
+            "天空",
+            "空亡"
+          ],
+          "major_stars": [
+            "太阳",
+            "太阴"
+          ],
+          "minor_stars": [
+            "左辅",
+            "右弼",
+            "天钺",
+            "地空",
+            "铃星",
+            "陀罗"
+          ],
+          "mutagen": null,
+          "position": "未"
+        }
+      },
+      "soul": {
+        "palace": "丑",
+        "star": "巨门"
+      },
+      "system": "ziwei"
+    },
+    "confidence": 0.3333333333333333,
+    "contradictions": [
+      "father_zodiac: 预测卯≠实际龙",
+      "mother_zodiac: 预测巳≠实际蛇"
+    ],
+    "kefen_string": "二刻0分",
+    "matched_facts": [
+      "siblings=3"
+    ],
+    "method": "考刻定分",
+    "predicted_tiaowen": [],
+    "verified_fen": 0,
+    "verified_ke": 2
+  },
+  "input": {
+    "birth_datetime": "1990-05-01 08:30:00",
+    "calendar": "solar",
+    "gender": "男",
+    "timezone_offset": 8
+  },
+  "known_facts": {
+    "father_zodiac": "龙",
+    "mother_zodiac": "蛇",
+    "siblings": "3"
+  },
+  "system": "tieban"
+}

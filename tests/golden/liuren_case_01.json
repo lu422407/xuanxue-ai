@@ -1,0 +1,103 @@
+{
+  "expected": {
+    "divination_time": "2024-03-05 10:00:00",
+    "engine_source": "dalurenpython",
+    "engine_version": "1.0.0",
+    "input_echo": {
+      "birth_datetime": "2024-03-05 10:00:00",
+      "calendar": "solar",
+      "divination_time": "2024-03-05 10:00:00",
+      "lunar": {
+        "has_jieqi": true,
+        "is_lunar_leap": false,
+        "jieqi": 5,
+        "lunar_day": 25,
+        "lunar_month": 1,
+        "lunar_year": 2024
+      },
+      "timezone_offset": 8.0,
+      "true_solar_time_applied": false
+    },
+    "pillars": {
+      "day": "戊辰",
+      "hour": "丁巳",
+      "month": "丁卯",
+      "year": "甲辰"
+    },
+    "solar_terms": {
+      "jie": "立春 2024-02-04 16:26:56",
+      "qi": "雨水 2024-02-19 12:13:00"
+    },
+    "system": "liuren",
+    "三传": {
+      "中传": "未",
+      "六亲": [
+        "官",
+        "兄",
+        "财"
+      ],
+      "初传": "寅",
+      "末传": "子",
+      "遁干": [
+        "丙",
+        "辛",
+        "甲"
+      ]
+    },
+    "占时": "巳",
+    "四课": {
+      "一课": [
+        "戌",
+        "戊"
+      ],
+      "三课": [
+        "酉",
+        "辰"
+      ],
+      "二课": [
+        "卯",
+        "戌"
+      ],
+      "四课": [
+        "寅",
+        "酉"
+      ]
+    },
+    "天地盘": {
+      "丑": "午",
+      "亥": "辰",
+      "午": "亥",
+      "卯": "申",
+      "子": "巳",
+      "寅": "未",
+      "巳": "戌",
+      "戌": "卯",
+      "未": "子",
+      "申": "丑",
+      "辰": "酉",
+      "酉": "寅"
+    },
+    "天将": {
+      "中传": "空",
+      "初传": "后",
+      "末传": "蛇"
+    },
+    "月将": "戌",
+    "格局": [
+      "重审卦",
+      "六仪卦"
+    ],
+    "空亡": [
+      "戌",
+      "亥"
+    ]
+  },
+  "input": {
+    "birth_datetime": "2024-03-05 10:00:00",
+    "calendar": "solar",
+    "divination_datetime": "2024-03-05 10:00:00",
+    "gender": "男",
+    "timezone_offset": 8
+  },
+  "system": "liuren"
+}

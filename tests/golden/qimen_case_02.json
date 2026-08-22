@@ -1,0 +1,143 @@
+{
+  "expected": {
+    "ba_zi": {
+      "day": {
+        "branch": "辰",
+        "stem": "戊"
+      },
+      "hour": {
+        "branch": "巳",
+        "stem": "丁"
+      },
+      "month": {
+        "branch": "寅",
+        "stem": "丙"
+      },
+      "xun_kong_1": "戌",
+      "xun_kong_2": "亥",
+      "year": {
+        "branch": "辰",
+        "stem": "甲"
+      }
+    },
+    "description": "奇门遁甲排盘\n节气: 惊蛰\n阴阳遁: 阳遁\n三元: 下元\n局数: 4\n直符: 天心\n直使: 开\n\n══════════════════════════\n九宫排盘：\n══════════════════════════\n║西北天心║北  天蓬║东北天任║\n║ 开     ║ 休     ║ 生     ║\n║ 直符   ║ 腾蛇   ║ 太阴   ║\n║地:壬    ║地:癸    ║地:丁    ║\n║天:壬    ║天:癸    ║天:丁    ║\n╠════════╬════════╬════════╣\n║西  天柱║中  天芮║东  天冲║\n║ 惊     ║ 未知   ║ 伤     ║\n║ 九天   ║ 直符   ║ 六合   ║\n║地:辛    ║地:庚    ║地:丙    ║\n║天:辛    ║天:庚    ║天:丙    ║\n╠════════╬════════╬════════╣\n║西南天芮║南  天英║东南天辅║\n║ 死     ║ 景     ║ 杜     ║\n║ 九地   ║ 玄武   ║ 白虎   ║\n║地:庚    ║地:己    ║地:戊    ║\n║天:庚    ║天:己    ║天:戊    ║\n══════════════════════════\n",
+    "dun": "yang",
+    "dun_zh": "阳遁",
+    "input_echo": {
+      "birth_datetime": "2024-03-05 10:00:00",
+      "calendar": "solar",
+      "gender": "女",
+      "timezone_offset": 8.0
+    },
+    "ju": 4,
+    "lunar_date": {
+      "day": 25,
+      "is_leap_month": false,
+      "month": 1,
+      "year": 2024
+    },
+    "palaces": [
+      {
+        "di_gan": "癸",
+        "gate": "休",
+        "palace_name": "北",
+        "palace_num": 1,
+        "spirit": "腾蛇",
+        "star": "天蓬",
+        "tian_gan": "癸"
+      },
+      {
+        "di_gan": "庚",
+        "gate": "死",
+        "palace_name": "西南",
+        "palace_num": 2,
+        "spirit": "九地",
+        "star": "天芮",
+        "tian_gan": "庚"
+      },
+      {
+        "di_gan": "丙",
+        "gate": "伤",
+        "palace_name": "东",
+        "palace_num": 3,
+        "spirit": "六合",
+        "star": "天冲",
+        "tian_gan": "丙"
+      },
+      {
+        "di_gan": "戊",
+        "gate": "杜",
+        "palace_name": "东南",
+        "palace_num": 4,
+        "spirit": "白虎",
+        "star": "天辅",
+        "tian_gan": "戊"
+      },
+      {
+        "di_gan": "庚",
+        "gate": "未知",
+        "palace_name": "中",
+        "palace_num": 5,
+        "spirit": "直符",
+        "star": "天芮",
+        "tian_gan": "庚"
+      },
+      {
+        "di_gan": "壬",
+        "gate": "开",
+        "palace_name": "西北",
+        "palace_num": 6,
+        "spirit": "直符",
+        "star": "天心",
+        "tian_gan": "壬"
+      },
+      {
+        "di_gan": "辛",
+        "gate": "惊",
+        "palace_name": "西",
+        "palace_num": 7,
+        "spirit": "九天",
+        "star": "天柱",
+        "tian_gan": "辛"
+      },
+      {
+        "di_gan": "丁",
+        "gate": "生",
+        "palace_name": "东北",
+        "palace_num": 8,
+        "spirit": "太阴",
+        "star": "天任",
+        "tian_gan": "丁"
+      },
+      {
+        "di_gan": "己",
+        "gate": "景",
+        "palace_name": "南",
+        "palace_num": 9,
+        "spirit": "玄武",
+        "star": "天英",
+        "tian_gan": "己"
+      }
+    ],
+    "solar_date": {
+      "day": 5,
+      "hour": 10,
+      "month": 3,
+      "year": 2024
+    },
+    "solar_term": "惊蛰",
+    "system": "qimen",
+    "yuan": "xia",
+    "yuan_zh": "下元",
+    "zhi_fu_palace": "西北",
+    "zhi_fu_star": "天心",
+    "zhi_shi_gate": "开"
+  },
+  "input": {
+    "birth_datetime": "2024-03-05 10:00:00",
+    "calendar": "solar",
+    "gender": "女",
+    "timezone_offset": 8
+  },
+  "system": "qimen"
+}

@@ -1,0 +1,545 @@
+{
+  "expected": {
+    "ai_read": {
+      "八字": {
+        "年柱": {
+          "branch": "午",
+          "stem": "庚"
+        },
+        "日柱": {
+          "branch": "寅",
+          "stem": "丙"
+        },
+        "旬空1": "戌",
+        "旬空2": "亥",
+        "时柱": {
+          "branch": "辰",
+          "stem": "壬"
+        },
+        "月柱": {
+          "branch": "辰",
+          "stem": "庚"
+        }
+      },
+      "六爻": {
+        "1爻": {
+          "世应标记": " ",
+          "伏神": {
+            "五行": "木",
+            "六亲": "父母",
+            "地支": "卯",
+            "天干": "己",
+            "干支": "己卯"
+          },
+          "六神": "朱雀",
+          "变卦": {
+            "五行": "水",
+            "六亲": "官鬼",
+            "地支": "子",
+            "天干": "甲",
+            "干支": "甲子",
+            "爻性": "阳爻"
+          },
+          "旺衰": "死",
+          "是否动爻": true,
+          "本卦": {
+            "五行": "木",
+            "六亲": "父母",
+            "地支": "寅",
+            "天干": "戊",
+            "干支": "戊寅",
+            "爻性": "阴爻"
+          },
+          "爻位": 1
+        },
+        "2爻": {
+          "世应标记": " ",
+          "伏神": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "丑",
+            "天干": "己",
+            "干支": "己丑"
+          },
+          "六神": "勾陈",
+          "变卦": {
+            "五行": "木",
+            "六亲": "父母",
+            "地支": "寅",
+            "天干": "甲",
+            "干支": "甲寅",
+            "爻性": "阴爻"
+          },
+          "旺衰": "旺",
+          "是否动爻": false,
+          "本卦": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "辰",
+            "天干": "戊",
+            "干支": "戊辰",
+            "爻性": "阳爻"
+          },
+          "爻位": 2
+        },
+        "3爻": {
+          "世应标记": "世",
+          "伏神": {
+            "五行": "水",
+            "六亲": "官鬼",
+            "地支": "亥",
+            "天干": "己",
+            "干支": "己亥"
+          },
+          "六神": "螣蛇",
+          "变卦": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "辰",
+            "天干": "甲",
+            "干支": "甲辰",
+            "爻性": "阳爻"
+          },
+          "旺衰": "相",
+          "是否动爻": true,
+          "本卦": {
+            "五行": "火",
+            "六亲": "兄弟",
+            "地支": "午",
+            "天干": "戊",
+            "干支": "戊午",
+            "爻性": "阴爻"
+          },
+          "爻位": 3
+        },
+        "4爻": {
+          "世应标记": " ",
+          "伏神": {
+            "五行": "金",
+            "六亲": "妻财",
+            "地支": "酉",
+            "天干": "己",
+            "干支": "己酉"
+          },
+          "六神": "白虎",
+          "变卦": {
+            "五行": "金",
+            "六亲": "妻财",
+            "地支": "酉",
+            "天干": "己",
+            "干支": "己酉",
+            "爻性": "阴爻"
+          },
+          "旺衰": "休",
+          "是否动爻": false,
+          "本卦": {
+            "五行": "金",
+            "六亲": "妻财",
+            "地支": "酉",
+            "天干": "己",
+            "干支": "己酉",
+            "爻性": "阳爻"
+          },
+          "爻位": 4
+        },
+        "5爻": {
+          "世应标记": " ",
+          "伏神": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "未",
+            "天干": "己",
+            "干支": "己未"
+          },
+          "六神": "玄武",
+          "变卦": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "未",
+            "天干": "己",
+            "干支": "己未",
+            "爻性": "阳爻"
+          },
+          "旺衰": "旺",
+          "是否动爻": false,
+          "本卦": {
+            "五行": "土",
+            "六亲": "子孙",
+            "地支": "未",
+            "天干": "己",
+            "干支": "己未",
+            "爻性": "阴爻"
+          },
+          "爻位": 5
+        },
+        "6爻": {
+          "世应标记": "应",
+          "伏神": {
+            "五行": "火",
+            "六亲": "兄弟",
+            "地支": "巳",
+            "天干": "己",
+            "干支": "己巳"
+          },
+          "六神": "青龙",
+          "变卦": {
+            "五行": "火",
+            "六亲": "兄弟",
+            "地支": "巳",
+            "天干": "己",
+            "干支": "己巳",
+            "爻性": "阴爻"
+          },
+          "旺衰": "相",
+          "是否动爻": false,
+          "本卦": {
+            "五行": "火",
+            "六亲": "兄弟",
+            "地支": "巳",
+            "天干": "己",
+            "干支": "己巳",
+            "爻性": "阳爻"
+          },
+          "爻位": 6
+        }
+      },
+      "变卦名称": "乾宫: 火天大有",
+      "本卦名称": "离宫: 火水未济",
+      "神煞": {
+        "劫煞": [
+          "亥"
+        ],
+        "华盖": [
+          "戌"
+        ],
+        "天马": [
+          "戌"
+        ],
+        "太岁": [
+          "午"
+        ],
+        "将星": [
+          "午"
+        ],
+        "文昌": [
+          "申"
+        ],
+        "日合": [
+          "亥"
+        ],
+        "日德": [
+          "巳"
+        ],
+        "日破": [
+          "申"
+        ],
+        "日禄": [
+          "巳"
+        ],
+        "日辰": [
+          "寅"
+        ],
+        "月合": [
+          "酉"
+        ],
+        "月建": [
+          "辰"
+        ],
+        "月破": [
+          "戌"
+        ],
+        "桃花": [
+          "卯"
+        ],
+        "灾煞": [
+          "子"
+        ],
+        "羊刃": [
+          "午"
+        ],
+        "谋星": [
+          "辰"
+        ],
+        "贵人": [
+          "亥",
+          "酉"
+        ],
+        "驿马": [
+          "申"
+        ]
+      }
+    },
+    "ba_zi": {
+      "day": {
+        "branch": "寅",
+        "stem": "丙"
+      },
+      "hour": {
+        "branch": "辰",
+        "stem": "壬"
+      },
+      "month": {
+        "branch": "辰",
+        "stem": "庚"
+      },
+      "xun_kong_1": "戌",
+      "xun_kong_2": "亥",
+      "year": {
+        "branch": "午",
+        "stem": "庚"
+      }
+    },
+    "ben_gua_name": "离宫: 火水未济",
+    "input_echo": {
+      "birth_datetime": "1990-05-01 08:30:00",
+      "calendar": "solar",
+      "changing_lines": [
+        1,
+        3
+      ],
+      "gender": "女",
+      "main_hexagram_code": "010101",
+      "timezone_offset": 8.0
+    },
+    "shen_sa": {
+      "劫煞": [
+        "亥"
+      ],
+      "华盖": [
+        "戌"
+      ],
+      "天马": [
+        "戌"
+      ],
+      "太岁": [
+        "午"
+      ],
+      "将星": [
+        "午"
+      ],
+      "文昌": [
+        "申"
+      ],
+      "日合": [
+        "亥"
+      ],
+      "日德": [
+        "巳"
+      ],
+      "日破": [
+        "申"
+      ],
+      "日禄": [
+        "巳"
+      ],
+      "日辰": [
+        "寅"
+      ],
+      "月合": [
+        "酉"
+      ],
+      "月建": [
+        "辰"
+      ],
+      "月破": [
+        "戌"
+      ],
+      "桃花": [
+        "卯"
+      ],
+      "灾煞": [
+        "子"
+      ],
+      "羊刃": [
+        "午"
+      ],
+      "谋星": [
+        "辰"
+      ],
+      "贵人": [
+        "亥",
+        "酉"
+      ],
+      "驿马": [
+        "申"
+      ]
+    },
+    "system": "liuyao",
+    "yao": [
+      {
+        "changeMark": "X",
+        "changedElement": "水",
+        "changedPillar": {
+          "branch": "子",
+          "stem": "甲"
+        },
+        "changedRelative": "官鬼",
+        "hiddenElement": "木",
+        "hiddenPillar": {
+          "branch": "卯",
+          "stem": "己"
+        },
+        "hiddenRelative": "父母",
+        "isChanging": true,
+        "mainElement": "木",
+        "mainPillar": {
+          "branch": "寅",
+          "stem": "戊"
+        },
+        "mainRelative": "父母",
+        "mainYaoType": 48,
+        "position": 1,
+        "shiYingMark": " ",
+        "spirit": "朱雀",
+        "wangShuai": "死"
+      },
+      {
+        "changeMark": " ",
+        "changedElement": "木",
+        "changedPillar": {
+          "branch": "寅",
+          "stem": "甲"
+        },
+        "changedRelative": "父母",
+        "hiddenElement": "土",
+        "hiddenPillar": {
+          "branch": "丑",
+          "stem": "己"
+        },
+        "hiddenRelative": "子孙",
+        "isChanging": false,
+        "mainElement": "土",
+        "mainPillar": {
+          "branch": "辰",
+          "stem": "戊"
+        },
+        "mainRelative": "子孙",
+        "mainYaoType": 49,
+        "position": 2,
+        "shiYingMark": " ",
+        "spirit": "勾陈",
+        "wangShuai": "旺"
+      },
+      {
+        "changeMark": "X",
+        "changedElement": "土",
+        "changedPillar": {
+          "branch": "辰",
+          "stem": "甲"
+        },
+        "changedRelative": "子孙",
+        "hiddenElement": "水",
+        "hiddenPillar": {
+          "branch": "亥",
+          "stem": "己"
+        },
+        "hiddenRelative": "官鬼",
+        "isChanging": true,
+        "mainElement": "火",
+        "mainPillar": {
+          "branch": "午",
+          "stem": "戊"
+        },
+        "mainRelative": "兄弟",
+        "mainYaoType": 48,
+        "position": 3,
+        "shiYingMark": "世",
+        "spirit": "螣蛇",
+        "wangShuai": "相"
+      },
+      {
+        "changeMark": " ",
+        "changedElement": "金",
+        "changedPillar": {
+          "branch": "酉",
+          "stem": "己"
+        },
+        "changedRelative": "妻财",
+        "hiddenElement": "金",
+        "hiddenPillar": {
+          "branch": "酉",
+          "stem": "己"
+        },
+        "hiddenRelative": "妻财",
+        "isChanging": false,
+        "mainElement": "金",
+        "mainPillar": {
+          "branch": "酉",
+          "stem": "己"
+        },
+        "mainRelative": "妻财",
+        "mainYaoType": 49,
+        "position": 4,
+        "shiYingMark": " ",
+        "spirit": "白虎",
+        "wangShuai": "休"
+      },
+      {
+        "changeMark": " ",
+        "changedElement": "土",
+        "changedPillar": {
+          "branch": "未",
+          "stem": "己"
+        },
+        "changedRelative": "子孙",
+        "hiddenElement": "土",
+        "hiddenPillar": {
+          "branch": "未",
+          "stem": "己"
+        },
+        "hiddenRelative": "子孙",
+        "isChanging": false,
+        "mainElement": "土",
+        "mainPillar": {
+          "branch": "未",
+          "stem": "己"
+        },
+        "mainRelative": "子孙",
+        "mainYaoType": 48,
+        "position": 5,
+        "shiYingMark": " ",
+        "spirit": "玄武",
+        "wangShuai": "旺"
+      },
+      {
+        "changeMark": " ",
+        "changedElement": "火",
+        "changedPillar": {
+          "branch": "巳",
+          "stem": "己"
+        },
+        "changedRelative": "兄弟",
+        "hiddenElement": "火",
+        "hiddenPillar": {
+          "branch": "巳",
+          "stem": "己"
+        },
+        "hiddenRelative": "兄弟",
+        "isChanging": false,
+        "mainElement": "火",
+        "mainPillar": {
+          "branch": "巳",
+          "stem": "己"
+        },
+        "mainRelative": "兄弟",
+        "mainYaoType": 49,
+        "position": 6,
+        "shiYingMark": "应",
+        "spirit": "青龙",
+        "wangShuai": "相"
+      }
+    ]
+  },
+  "input": {
+    "birth_datetime": "1990-05-01 08:30:00",
+    "calendar": "solar",
+    "changing_lines": [
+      1,
+      3
+    ],
+    "gender": "女",
+    "main_hexagram_code": "010101",
+    "timezone_offset": 8
+  },
+  "system": "liuyao"
+}
