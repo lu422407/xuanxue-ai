@@ -139,7 +139,9 @@ class TieBanEngine(BaseEngine):
     def _load_tiaowen(self) -> List[Dict]:
         tiaowen: List[Dict] = []
         if self.tiaowen_path.exists():
-            for f in self.tiaowen_path.glob("*.json"):
+            # sorted：glob 返回顺序依文件系统而异（APFS/ext4 不同），
+            # 排序保证跨平台加载顺序一致（黄金测试依赖 predicted_tiaowen 确定性）
+            for f in sorted(self.tiaowen_path.glob("*.json")):
                 try:
                     with open(f, "r", encoding="utf-8") as file:
                         data = json.load(file)

@@ -67,17 +67,27 @@ jobs:
       - name: 编译 ZhouYiLab CLI（example_zhouyi_cli）
         run: |
           cd third_party/ZhouYiLab
-          cmake -B build_ci -G Ninja \
+          # 编译到 build/：这是 zhouyi_bridge 的第一候选路径，
+          # cli_available() 直接走文件探测，不依赖环境变量注入
+          cmake -B build -G Ninja \
             -DCMAKE_C_COMPILER=clang-20 \
             -DCMAKE_CXX_COMPILER=clang++-20 \
             -DBUILD_EXAMPLES=ON \
             -DZHOUYILAB_MODULE_MODE=LOCAL \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build_ci --target example_zhouyi_cli
+          cmake --build build --target example_zhouyi_cli
+
+      - name: CLI 冒烟（bridge 真实调用一次）
+        run: |
+          python - <<'PY'
+          from engines import zhouyi_bridge
+          assert zhouyi_bridge.cli_available(), "bridge 未发现 CLI（build/examples/example_zhouyi_cli）"
+          r = zhouyi_bridge.calculate_qi_men({"year": 2024, "month": 3, "day": 5, "hour": 10, "minute": 0})
+          assert r["ok"], f"奇门排盘失败: {r}"
+          print("CLI 冒烟通过：", zhouyi_bridge._resolve_binary())
+          PY
 
       - name: 全量测试（奇门/六爻真实链路）
-        env:
-          ZHOUEYILAB_CLI: ${{ github.workspace }}/third_party/ZhouYiLab/build_ci/examples/example_zhouyi_cli
         run: |
           set -o pipefail
           pytest -q -rs | tee /tmp/pytest.out
