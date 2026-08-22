@@ -75,6 +75,22 @@ class FactValidator:
         return "平"
 
     @classmethod
+    def validate_brightness_table(cls) -> Tuple[bool, List[str]]:
+        """校验亮度表自身的数据完整性：同一星曜同一宫位不得出现在两个亮度档。"""
+        errors: List[str] = []
+        for star, levels in ZIWEI_BRIGHTNESS.items():
+            seen: Dict[str, str] = {}
+            for brightness, positions in levels.items():
+                for pos in positions:
+                    if pos in seen:
+                        errors.append(
+                            f"亮度表冲突：{star}在{pos}同时列为'{seen[pos]}'与'{brightness}'"
+                        )
+                    else:
+                        seen[pos] = brightness
+        return len(errors) == 0, errors
+
+    @classmethod
     def validate_sihua(cls, day_gan: str, mutagen: str, star: str) -> bool:
         """校验四化：给定日干与化曜，星名是否正确。"""
         mapping = SIHUA.get(day_gan)
@@ -84,5 +100,20 @@ class FactValidator:
 
     @classmethod
     def validate_liuren(cls, chart: Dict) -> Tuple[bool, List[str]]:
-        """六壬硬性校验（骨架，后续按四课三传规则扩展）。"""
-        return True, []
+        """六壬硬性校验（结构层）：四课 4 项、三传 3 传、天地盘 12 支。
+
+        课体吉凶等术数层规则后续扩展，此处先保证排盘结构不可能错位。
+        """
+        errors: List[str] = []
+        si_ke = chart.get("四课")
+        if isinstance(si_ke, dict) and len(si_ke) != 4:
+            errors.append(f"四课应为 4 项，实际 {len(si_ke)} 项")
+        san_chuan = chart.get("三传")
+        if isinstance(san_chuan, dict):
+            for key in ("初传", "中传", "末传"):
+                if not san_chuan.get(key):
+                    errors.append(f"三传缺少 {key}")
+        tian_di_pan = chart.get("天地盘")
+        if isinstance(tian_di_pan, dict) and len(tian_di_pan) != 12:
+            errors.append(f"天地盘应为 12 地支，实际 {len(tian_di_pan)} 项")
+        return len(errors) == 0, errors

@@ -64,3 +64,44 @@ def test_liuren_skeleton():
     passed, errors = FactValidator.validate_liuren({})
     assert passed is True
     assert errors == []
+
+
+# ---- 六壬结构校验 / 亮度表完整性 ----
+
+def test_validate_liuren_structural_ok():
+    from src.validator import FactValidator
+    chart = {
+        "四课": {"一课": ["戌", "戊"], "二课": ["卯", "戌"],
+                 "三课": ["酉", "辰"], "四课": ["寅", "酉"]},
+        "三传": {"初传": "寅", "中传": "未", "末传": "子"},
+        "天地盘": {z: z for z in "子丑寅卯辰巳午未申酉戌亥"},
+    }
+    ok, errors = FactValidator.validate_liuren(chart)
+    assert ok, errors
+
+
+def test_validate_liuren_detects_structure_errors():
+    from src.validator import FactValidator
+    bad = {
+        "四课": {"一课": ["戌", "戊"]},                      # 缺三课
+        "三传": {"初传": "寅", "中传": "未"},                 # 缺末传
+        "天地盘": {"子": "巳"},                              # 只有 1 支
+    }
+    ok, errors = FactValidator.validate_liuren(bad)
+    assert not ok
+    assert len(errors) == 3
+
+
+def test_brightness_table_consistency():
+    from src.validator import FactValidator
+    ok, errors = FactValidator.validate_brightness_table()
+    assert ok, errors
+
+
+def test_brightness_table_detects_conflict(monkeypatch):
+    import src.validator as v
+    broken = {"紫微": {"庙": ["子"], "旺": ["子"], "陷": []}}  # 子同时庙/旺
+    monkeypatch.setattr(v, "ZIWEI_BRIGHTNESS", broken)
+    ok, errors = v.FactValidator.validate_brightness_table()
+    assert not ok
+    assert any("子" in e for e in errors)
