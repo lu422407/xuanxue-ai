@@ -17,6 +17,7 @@ openai==3.3.0
 numpy==2.4.6
 # 测试
 pytest==9.1.1
+pytest-cov==7.1.0
 httpx==0.28.1
 # 大六壬（dalurenpython 子模块依赖）
 eacal==0.0.3

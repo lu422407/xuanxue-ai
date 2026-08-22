@@ -1,0 +1,19 @@
+# 覆盖率配置（README 红线：> 80%）
+# 运行：pytest --cov --cov-fail-under=80
+[run]
+source =
+    engines
+    agents
+    src
+    api
+    fusion
+    rag
+    llm
+    observability
+    database
+omit =
+    # 子进程模块：在 ziwei_worker 子进程中执行，进程内 coverage 不可见
+    engines/ziwei_worker.py
+
+[report]
+precision = 1

@@ -1,0 +1,30 @@
+# CI：全量 pytest + 覆盖率红线（README 要求 >80%）
+# 说明：奇门/六爻依赖的 ZhouYiLab C++ CLI 不在 CI 内编译（耗时且需 LLVM），
+# 相关测试带 skipif 会自动跳过，不产生假失败。knowledge/ 已入库，无需 submodules。
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install astropy
+          pip install git+https://github.com/wlhyl/ganzhiwuxinForPython.git
+
+      - name: 测试（含覆盖率红线 80%）
+        run: pytest --cov --cov-fail-under=80
