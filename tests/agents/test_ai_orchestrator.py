@@ -249,6 +249,55 @@ def test_no_citations_for_offtopic_question():
     assert r.synthesis["citations"] == []
 
 
+def test_citations_interleave_categories():
+    """首条偏置缓解：多类别命中时按 category 轮转，而非让同类别霸榜。"""
+    class FakeRetriever:
+        def retrieve(self, query, top_k=5, reranker=None):
+            docs = []
+            # classics 三连占据分数前三（模拟 classic_ziwei_001 霸榜）
+            for i in range(3):
+                docs.append({
+                    "doc_id": f"classic_{i}", "score": 0.9 - i * 0.05,
+                    "text": "紫微斗数命宫事业",
+                    "metadata": {"category": "classics", "title": f"典籍{i}",
+                                 "reference": ""},
+                })
+            docs.append({"doc_id": "rule_1", "score": 0.5, "text": "紫微命宫规则事业",
+                         "metadata": {"category": "rules", "title": "规则",
+                                      "reference": ""}})
+            docs.append({"doc_id": "case_1", "score": 0.45, "text": "紫微命宫案例事业",
+                         "metadata": {"category": "cases", "title": "案例",
+                                      "reference": ""}})
+            return docs
+
+    orch = AIOrchestrator(llm=None, retriever=FakeRetriever())
+    cites = orch._collect_citations("看看紫微命宫事业", {}, top_k=3)
+    assert len(cites) == 3
+    ids = [c.split("[source:")[1].rstrip("]") for c in cites]
+    # 三类别各占一席（classics 按类别序取首名），而非 classic_0/1/2 霸榜
+    assert set(ids) == {"classic_0", "rule_1", "case_1"}, ids
+
+
+def test_citations_fill_from_same_category_when_exhausted():
+    """类别少于 top_k 时，剩余席位按分数序从各类别补齐。"""
+
+    class FakeRetriever:
+        def retrieve(self, query, top_k=5, reranker=None):
+            return [
+                {"doc_id": "classic_0", "score": 0.9, "text": "紫微斗数命宫事业",
+                 "metadata": {"category": "classics", "title": "典籍0", "reference": ""}},
+                {"doc_id": "classic_1", "score": 0.8, "text": "紫微斗数命宫事业",
+                 "metadata": {"category": "classics", "title": "典籍1", "reference": ""}},
+                {"doc_id": "rule_1", "score": 0.5, "text": "紫微命宫规则事业",
+                 "metadata": {"category": "rules", "title": "规则", "reference": ""}},
+            ]
+
+    orch = AIOrchestrator(llm=None, retriever=FakeRetriever())
+    cites = orch._collect_citations("看看紫微命宫事业", {}, top_k=3)
+    ids = [c.split("[source:")[1].rstrip("]") for c in cites]
+    assert ids == ["classic_0", "rule_1", "classic_1"], ids
+
+
 # ---- Phase F：链路追踪 ----
 
 def test_run_records_trace_spans_and_cost():

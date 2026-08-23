@@ -576,19 +576,31 @@ class AIOrchestrator:
         query_bigrams = _bigrams(query)
         if not query_bigrams:
             return []
+        qualified = [
+            hit for hit in retriever.retrieve(query, top_k=8)
+            if hit["score"] >= min_score
+            and (query_bigrams & _bigrams(hit["text"]))
+        ]
+        # 首条偏置缓解：分数排序下同一类别（如 classic_ziwei_001 所在的
+        # classics）几乎总霸榜前几名。按 category 轮转交错（各类别内保持
+        # 分数序，类别顺序 sorted 保证确定性），提高引用多样性。
+        by_cat: Dict[str, List[Dict[str, Any]]] = {}
+        for hit in qualified:
+            cat = (hit.get("metadata") or {}).get("category") or "other"
+            by_cat.setdefault(cat, []).append(hit)
+        interleaved: List[Dict[str, Any]] = []
+        while len(interleaved) < len(qualified):
+            for cat in sorted(by_cat):
+                if by_cat[cat]:
+                    interleaved.append(by_cat[cat].pop(0))
+
         citations: List[str] = []
-        for hit in retriever.retrieve(query, top_k=8):
-            if hit["score"] < min_score:
-                continue
-            if not (query_bigrams & _bigrams(hit["text"])):
-                continue
+        for hit in interleaved[:top_k]:
             meta = hit.get("metadata") or {}
             title = meta.get("title") or hit["doc_id"]
             reference = meta.get("reference") or ""
             ref_part = f"（{reference}）" if reference else ""
             citations.append(f"{title}{ref_part}[source:{hit['doc_id']}]")
-            if len(citations) >= top_k:
-                break
         return citations
 
     # ---- ⑦ Explainer ----

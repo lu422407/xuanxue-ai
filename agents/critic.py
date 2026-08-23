@@ -35,6 +35,9 @@ QIMEN_SPIRITS = {
 LIUYAO_SPIRITS = {"青龙", "朱雀", "勾陈", "螣蛇", "白虎", "玄武"}
 LIUYAO_RELATIVES = {"兄弟", "子孙", "妻财", "官鬼", "父母"}
 
+# 铁板条文引文（「」『』“”等引号内 ≥4 字视为条文引用声称）
+_TIEBAN_QUOTE_RE = re.compile(r"[「『“\"]([^」』”\"]{4,60})[」』”\"]")
+
 
 @dataclass
 class ValidationReport:
@@ -59,6 +62,8 @@ class Critic:
                 issues += self._check_liuyao(draft_answer, chart)
             elif system == "liuren":
                 issues += self._check_liuren(draft_answer, chart)
+            elif system == "tieban":
+                issues += self._check_tieban(draft_answer, chart)
         return ValidationReport(passed=not issues, issues=issues)
 
     # ---- Chart Validator ----
@@ -180,6 +185,44 @@ class Critic:
                 issues.append(
                     f"月将声称不符：'{m.group(1)}' 与本盘月将 '{actual_yuejiang}' 不一致"
                 )
+        return issues
+
+    def _check_tieban(self, text: str, chart: Dict[str, Any]) -> List[str]:
+        """铁板声称校验：条文号与引文必须来自本盘考刻实际命中的条文。
+
+        校验范围是引擎为本次命盘返回的条文（predicted_tiaowen / details），
+        而非全部 12,000 条库——LLM 只应引用引擎真实产出的条文，
+        防止编造条文号或杜撰条文正文。
+        """
+        tiaowen: List[Dict[str, Any]] = list(chart.get("predicted_tiaowen") or [])
+        details = chart.get("details")
+        if isinstance(details, dict):
+            for items in details.values():
+                if isinstance(items, list):
+                    tiaowen.extend(x for x in items if isinstance(x, dict))
+        if not tiaowen:
+            return []
+
+        valid_numbers = {tw.get("verse_no") for tw in tiaowen if tw.get("verse_no")}
+        valid_ids = {tw.get("id") for tw in tiaowen if tw.get("id")}
+        valid_texts = [tw.get("text") for tw in tiaowen if tw.get("text")]
+
+        issues: List[str] = []
+        # 1) 条文号声称："条文5001"、"条文第5001条"、"第5001条"
+        for m in re.finditer(r"条文(?:第)?\s*(\d{3,5})|第\s*(\d{3,5})\s*条", text):
+            num = int(m.group(1) or m.group(2))
+            if num not in valid_numbers:
+                issues.append(f"条文号声称不符：'{num}' 不在本盘考刻命中的条文中")
+        # 2) 条文编号声称："TB-R-05001"
+        for m in re.finditer(r"(TB-R-\d{4,6})", text):
+            if m.group(1) not in valid_ids:
+                issues.append(f"条文编号声称不符：'{m.group(1)}' 不在本盘考刻命中的条文中")
+        # 3) 引文声称：引号内 ≥4 字文本须与某条命中条文一致或为其片段
+        for m in _TIEBAN_QUOTE_RE.finditer(text):
+            quote = m.group(1).strip()
+            if not any(quote == t or quote in t for t in valid_texts):
+                preview = quote if len(quote) <= 12 else quote[:12] + "…"
+                issues.append(f"条文引文声称不符：'{preview}' 不在本盘考刻命中的条文中")
         return issues
 
     # ---- Logic Validator ----

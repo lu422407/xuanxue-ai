@@ -137,3 +137,74 @@ def test_detects_fake_liuren_yuejiang():
     report = Critic().validate(f"本月将为{fake}，课体已定。", {"liuren": chart})
     assert not report.passed
     assert any("月将" in i for i in report.issues)
+
+
+# ---- 铁板神数声称校验（防 LLM 编造条文号/条文正文） ----
+
+def _tieban_details():
+    from engines.tieban_engine import TieBanEngine
+    return TieBanEngine().interpret_life(3, 5)["details"]
+
+
+def _flatten(details):
+    return [tw for items in details.values() for tw in items]
+
+
+def test_detects_fake_tieban_verse_no():
+    details = _tieban_details()
+    verses = {tw.get("verse_no", 0) for tw in _flatten(details)}
+    fake_no = next(n for n in (9999, 8888, 7777, 6666) if n not in verses)
+    draft = f"考刻既定，条文{fake_no}明言吉凶。"
+    report = Critic().validate(draft, {"tieban": {"details": details}})
+    assert not report.passed
+    assert any(str(fake_no) in i and "条文号" in i for i in report.issues)
+
+
+def test_detects_fake_tieban_verse_no_di_form():
+    details = _tieban_details()
+    verses = {tw.get("verse_no", 0) for tw in _flatten(details)}
+    fake_no = next(n for n in (9999, 8888, 7777) if n not in verses)
+    report = Critic().validate(f"命书第{fake_no}条言之凿凿。", {"tieban": {"details": details}})
+    assert any(str(fake_no) in i and "条文号" in i for i in report.issues)
+
+
+def test_detects_fake_tieban_id():
+    details = _tieban_details()
+    report = Critic().validate("命书TB-R-99999条言之凿凿。", {"tieban": {"details": details}})
+    assert any("TB-R-99999" in i and "条文编号" in i for i in report.issues)
+
+
+def test_detects_fake_tieban_quote():
+    details = _tieban_details()
+    # 人为注入错误：编造一段从未存在于本盘命中条文的正文
+    draft = "条文有云：「祖业田庄遍九州，妻贤子孝福无边」。"
+    report = Critic().validate(draft, {"tieban": {"details": details}})
+    assert not report.passed
+    assert any("引文" in i for i in report.issues)
+
+
+def test_tieban_consistent_quote_and_number_pass():
+    details = _tieban_details()
+    hit = next(tw for tw in _flatten(details)
+               if tw.get("verse_no", 0) >= 100
+               and 4 <= len(tw.get("text", "")) <= 40
+               and "「" not in tw["text"] and "」" not in tw["text"])
+    # 全文引用 + 片段引用（取前 4 字）均应通过
+    draft = f"考刻得条文{hit['verse_no']}，云：「{hit['text']}」。又见「{hit['text'][:4]}」之断。"
+    report = Critic().validate(draft, {"tieban": {"details": details}})
+    assert report.passed, report.issues
+
+
+def test_tieban_predicted_tiaowen_shape_checked():
+    details = _tieban_details()
+    hit = next(tw for tw in _flatten(details) if tw.get("verse_no", 0) >= 100)
+    draft = f"条文{hit['verse_no']}：「纯属虚构的正文内容」。"
+    report = Critic().validate(draft, {"tieban": {"predicted_tiaowen": [hit]}})
+    assert any("引文" in i for i in report.issues)
+    assert not any("条文号" in i for i in report.issues)
+
+
+def test_tieban_no_tiaowen_skips_check():
+    # 引擎降级（无命中条文）时无事实基准，不产生误报
+    report = Critic().validate("条文9999曰：「虚构正文」。", {"tieban": {"tiaowen_count": 0}})
+    assert report.passed, report.issues
