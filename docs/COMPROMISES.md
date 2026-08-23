@@ -24,7 +24,7 @@
 ## 二、可解决待做（技术无障碍，按价值排序）
 
 1. **validate_ziwei 亮度校验对字符串契约生效**：需要引擎输出亮度字段（py-iztro 原始数据里有 `brightness`，`ziwei_engine.py` 目前丢弃了）或改为查表比对。改引擎输出会破坏 10 个紫微黄金用例，需同步再固化。
-2. **Critic 补 tieban**：条文库当前是占位数据，等真实条文入库后校验才有意义。
+2. **Critic 补 tieban**：真实条文已于第四批入库（12,000 条，见 SOURCES.md），素材不再是阻塞——可校验"考刻结果引用的条文号/正文"与库中一致，防 LLM 编造条文号。
 3. **RAG 首条偏置缓解**：检索结果按分数排序，`classic_ziwei_001` 几乎总在前列；可在编排层按 category 去重（classics/rules/cases 各取一条）提高多样性。
 4. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。
 5. **critic.check_hallucination / check_safety 做实**：前者可接 citation_checker（模块现成），后者目前只有一条正则。

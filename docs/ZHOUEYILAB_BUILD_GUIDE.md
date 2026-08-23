@@ -4,6 +4,12 @@
 > 日期：2026-08-19
 > 对象：`third_party/ZhouYiLab`（C++23 Modules 多术数算法库）
 > 目标：说明当前缺什么、Windows 如何准备、编译后如何接入 `engines/qimen_engine.py` / `liuyao_engine.py`
+>
+> **⚠️ 2026-08-22 时效说明**：本指南写于接入规划期，§0 状态表与"NotImplementedError 门控"
+> 均为历史信息——引擎接入早已完成（`engines/zhouyi_bridge.py` 子进程调用
+> `example_zhouyi_cli`），C++ 依赖已 vendor（无需嵌套子模块），fork 已修复 clang 模块
+> 可见性问题。最新环境步骤以 `HANDOVER.md`（Windows 接手版）为准；本指南 §2 的
+> Windows 编译路线（MSVC / MSYS2）仍然有效。
 
 ---
 
