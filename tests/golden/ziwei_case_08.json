@@ -39,8 +39,14 @@
       "父母": {
         "position": "寅",
         "major_stars": [
-          "武曲",
-          "天相"
+          {
+            "name": "武曲",
+            "brightness": "得"
+          },
+          {
+            "name": "天相",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "陀罗"
@@ -55,8 +61,14 @@
       "福德": {
         "position": "卯",
         "major_stars": [
-          "太阳",
-          "天梁"
+          {
+            "name": "太阳",
+            "brightness": "庙"
+          },
+          {
+            "name": "天梁",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "左辅",
@@ -71,7 +83,10 @@
       "田宅": {
         "position": "辰",
         "major_stars": [
-          "七杀"
+          {
+            "name": "七杀",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "文曲",
@@ -88,7 +103,10 @@
       "官禄": {
         "position": "巳",
         "major_stars": [
-          "天机"
+          {
+            "name": "天机",
+            "brightness": "平"
+          }
         ],
         "minor_stars": [],
         "adopted_stars": [
@@ -99,7 +117,10 @@
       "仆役": {
         "position": "午",
         "major_stars": [
-          "紫微"
+          {
+            "name": "紫微",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [],
         "adopted_stars": [
@@ -128,7 +149,10 @@
       "疾厄": {
         "position": "申",
         "major_stars": [
-          "破军"
+          {
+            "name": "破军",
+            "brightness": "得"
+          }
         ],
         "minor_stars": [
           "天钺"
@@ -152,8 +176,14 @@
       "子女": {
         "position": "戌",
         "major_stars": [
-          "廉贞",
-          "天府"
+          {
+            "name": "廉贞",
+            "brightness": "利"
+          },
+          {
+            "name": "天府",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "文昌",
@@ -171,7 +201,10 @@
       "夫妻": {
         "position": "亥",
         "major_stars": [
-          "太阴"
+          {
+            "name": "太阴",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "右弼",
@@ -189,7 +222,10 @@
       "兄弟": {
         "position": "子",
         "major_stars": [
-          "贪狼"
+          {
+            "name": "贪狼",
+            "brightness": "旺"
+          }
         ],
         "minor_stars": [
           "天魁"
@@ -203,8 +239,14 @@
       "命宫": {
         "position": "丑",
         "major_stars": [
-          "天同",
-          "巨门"
+          {
+            "name": "天同",
+            "brightness": "不"
+          },
+          {
+            "name": "巨门",
+            "brightness": "不"
+          }
         ],
         "minor_stars": [],
         "adopted_stars": [

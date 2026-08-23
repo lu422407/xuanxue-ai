@@ -49,6 +49,51 @@ def test_safety_absolutism():
     issues = critic.check_safety("我保证您明年一定发财")
     assert issues
 
+
+# ---- check_hallucination / check_safety 做实 ----
+
+def test_check_hallucination_flags_fabricated_source():
+    issues = Critic().check_hallucination(
+        "古籍有云……[source:classic_fake_999]",
+        citations=["紫微斗数全书（卷一）[source:classic_real_001]"])
+    assert any("classic_fake_999" in i for i in issues)
+
+
+def test_check_hallucination_allows_retrieved_source():
+    issues = Critic().check_hallucination(
+        "见[source:classic_real_001]所载",
+        citations=["紫微斗数全书（卷一）[source:classic_real_001]"])
+    assert issues == []
+
+
+def test_check_hallucination_store_fallback():
+    class FakeStore:
+        def exists(self, doc_id):
+            return doc_id == "kb_001"
+
+    critic = Critic()
+    assert critic.check_hallucination("[source:kb_001]", store=FakeStore()) == []
+    assert critic.check_hallucination("[source:kb_bad]", store=FakeStore())
+
+
+def test_check_hallucination_no_basis_no_issue():
+    # 无 citations 且无 store：没有事实基准，不得臆断
+    assert Critic().check_hallucination("[source:anything]") == []
+
+
+def test_safety_domain_expansion():
+    critic = Critic()
+    for text in ("可以停药，照此方调理即可",
+                 "这场官司必胜诉，放心",
+                 "该产品零风险，明年必涨",
+                 "老师保证无罪，案件必赢"):
+        assert critic.check_safety(text), text
+
+
+def test_safety_cultural_disclaimer_not_flagged():
+    critic = Critic()
+    assert critic.check_safety("以上为传统文化推演，不构成医疗或投资建议。") == []
+
 # ---- 奇门 / 六爻 / 六壬声称校验 ----
 
 QM_BIRTH = {

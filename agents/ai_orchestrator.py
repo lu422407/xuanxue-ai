@@ -623,7 +623,16 @@ class AIOrchestrator:
 
         # Critic：若 LLM 文本与命盘不符，回退原始命盘摘要（绝不传播编造内容）
         report: ValidationReport = self.critic.validate(text, engine_results)
-        if not report.passed and self.llm is not None:
+        retriever = self._ensure_retriever()
+        halluc_issues = self.critic.check_hallucination(
+            text, citations=synthesis.citations,
+            store=retriever.store if retriever else None)
+        safety_issues = self.critic.check_safety(text)
+        for tag, found in (("引用溯源", halluc_issues), ("安全", safety_issues)):
+            if found:
+                logger.warning("Critic %s校验不通过：%s", tag, found)
+        if self.llm is not None and (
+                not report.passed or halluc_issues or safety_issues):
             text = self._text_summary(engine_results, synthesis)
         return text
 
@@ -653,7 +662,8 @@ class AIOrchestrator:
             if system == "ziwei":
                 ming = chart.get("palaces", {}).get("命宫", {})
                 stars = ming.get("major_stars", [])
-                lines.append(f"命宫主星：{', '.join(stars) if stars else '无'}")
+                star_names = [s["name"] if isinstance(s, dict) else s for s in stars]
+                lines.append(f"命宫主星：{', '.join(star_names) if star_names else '无'}")
             elif system == "bazi":
                 pillars = chart.get("pillars", {})
                 if pillars:

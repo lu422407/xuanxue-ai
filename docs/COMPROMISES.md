@@ -23,12 +23,12 @@
 | 10 | Critic 补 tieban（原二档 #2） | `_check_tieban`：条文号（"条文5001"/"第5001条"/TB-R 编号）与引文（引号内 ≥4 字，支持片段）必须来自本盘考刻实际命中的条文（predicted_tiaowen/details），防 LLM 编造；引擎降级无条文时不误报 |
 | 11 | RAG 首条偏置（原二档 #3） | `_collect_citations` 按 category 轮转交错（类内保分数序、类别序 sorted 确定性），classics/rules/cases 各占一席后再按分补齐，缓解 `classic_ziwei_001` 类霸榜 |
 | 12 | （2026-08-23）Windows 无 VS/MSYS2，ZhouYiLab CLI 编译路径不通 | WinLibs GCC 16.1 + CMake 4.4（`CMAKE_CXX_MODULE_STD` + experimental UUID）编译成功；fork 三处修复：magic_enum 模块在 GCC 下走 header 模式（purview 文本包含 mingw CRT 头与 import std 冲突）、补 `<format>` 头、链接 `stdc++exp` + `-static`（CLI 自包含，免疫 DLL 地狱） |
+| 13 | validate_ziwei 亮度校验空转（原二档 #1） | ①`ziwei_engine` 主星输出改为 `{name, brightness}`（py-iztro 实测值，不再丢弃）；②亮度表重写为 **py-iztro 全枚举实测表·全 14 主星 × 12 宫**（2 年干×12 农历月×30 日×13 时辰=1440 盘，(星,宫)→亮度 纯函数零冲突；旧简化表多处错误，如紫微实无陷、太阳庙仅卯）——表定位为 iztro 行为快照（升级回归锚点），非独立考据；③validate_ziwei 改为亮度域校验+全档位位置比对；④10 紫微+1 铁板黄金用例重固化（考刻结论断言不变后再生效）；⑤critic/orchestrator/fusion 消费方兼容 dict 星曜；⑥完备性守卫测试（14 星 × 12 宫覆盖恰全集） |
+| 14 | check_hallucination / check_safety 是占位（原二档 #3） | ①check_hallucination 接 citation_checker：`[source:id]` 声称须在本次检索结果（或知识库）中存在，无基准不臆断；②check_safety 扩展医疗越界/法律越界/财务保证三域（保留 v1 绝对化承诺原语义）；③两者接线进 `_explain` 回退门（与命盘校验同权：触发即回退确定性摘要+warning 日志），不留死代码 |
 
 ## 二、可解决待做（技术无障碍，按价值排序）
 
-1. **validate_ziwei 亮度校验对字符串契约生效**：需要引擎输出亮度字段（py-iztro 原始数据里有 `brightness`，`ziwei_engine.py` 目前丢弃了）或改为查表比对。改引擎输出会破坏 10 个紫微黄金用例，需同步再固化。
-2. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。
-3. **critic.check_hallucination / check_safety 做实**：前者可接 citation_checker（模块现成），后者目前只有一条正则。
+1. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。
 
 ## 三、需要决策（做不做/怎么做取决于产品形态）
 

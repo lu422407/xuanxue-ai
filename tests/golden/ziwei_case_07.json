@@ -39,8 +39,14 @@
       "仆役": {
         "position": "寅",
         "major_stars": [
-          "太阳",
-          "巨门"
+          {
+            "name": "太阳",
+            "brightness": "旺"
+          },
+          {
+            "name": "巨门",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "陀罗"
@@ -53,7 +59,10 @@
       "迁移": {
         "position": "卯",
         "major_stars": [
-          "天相"
+          {
+            "name": "天相",
+            "brightness": "陷"
+          }
         ],
         "minor_stars": [
           "禄存"
@@ -67,8 +76,14 @@
       "疾厄": {
         "position": "辰",
         "major_stars": [
-          "天机",
-          "天梁"
+          {
+            "name": "天机",
+            "brightness": "利"
+          },
+          {
+            "name": "天梁",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "擎羊"
@@ -86,8 +101,14 @@
       "财帛": {
         "position": "巳",
         "major_stars": [
-          "紫微",
-          "七杀"
+          {
+            "name": "紫微",
+            "brightness": "旺"
+          },
+          {
+            "name": "七杀",
+            "brightness": "平"
+          }
         ],
         "minor_stars": [
           "天马"
@@ -147,8 +168,14 @@
       "命宫": {
         "position": "酉",
         "major_stars": [
-          "廉贞",
-          "破军"
+          {
+            "name": "廉贞",
+            "brightness": "平"
+          },
+          {
+            "name": "破军",
+            "brightness": "陷"
+          }
         ],
         "minor_stars": [
           "地空"
@@ -171,7 +198,10 @@
       "福德": {
         "position": "亥",
         "major_stars": [
-          "天府"
+          {
+            "name": "天府",
+            "brightness": "得"
+          }
         ],
         "minor_stars": [
           "火星"
@@ -182,8 +212,14 @@
       "田宅": {
         "position": "子",
         "major_stars": [
-          "天同",
-          "太阴"
+          {
+            "name": "天同",
+            "brightness": "旺"
+          },
+          {
+            "name": "太阴",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "天魁",
@@ -200,8 +236,14 @@
       "官禄": {
         "position": "丑",
         "major_stars": [
-          "武曲",
-          "贪狼"
+          {
+            "name": "武曲",
+            "brightness": "庙"
+          },
+          {
+            "name": "贪狼",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "左辅",

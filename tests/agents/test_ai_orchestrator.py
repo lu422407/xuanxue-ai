@@ -171,6 +171,29 @@ def test_llm_hallucination_falls_back_to_text_summary():
     assert "【bazi】" in r.answer
 
 
+def test_llm_fabricated_citation_falls_back_to_text_summary():
+    llm = FakeLLM(default_generate="命盘显示……参考[source:totally_fake_1]")
+    r = AIOrchestrator(llm=llm).run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}},
+    })
+    # 编造引用触发回退：LLM 文本被确定性摘要替换，伪造 source 不得外泄
+    assert "[source:totally_fake_1]" not in r.answer
+    assert "【bazi】" in r.answer
+
+
+def test_llm_unsafe_promise_falls_back_to_text_summary():
+    llm = FakeLLM(default_generate="放心，这款产品零风险，明年必涨，稳赚不赔。")
+    r = AIOrchestrator(llm=llm).run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}},
+    })
+    assert "稳赚不赔" not in r.answer
+    assert "【bazi】" in r.answer
+
+
 def test_extract_birth_params_from_question():
     orch = _orch()
     from agents.ai_orchestrator import OrchestratorRequest

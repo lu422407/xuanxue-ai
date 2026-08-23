@@ -21,9 +21,10 @@ def analyze_career(charts: Dict[str, Any]) -> Dict[str, Any]:
     if "ziwei" in charts:
         career_palace = charts["ziwei"].get("palaces", {}).get("官禄", {})
         stars = career_palace.get("major_stars", [])
+        star_names = [s["name"] if isinstance(s, dict) else s for s in stars]
         factors.append({
             "source": "ziwei",
-            "signal": "官禄宫主星" + ("、".join(stars) if stars else "无主星"),
+            "signal": "官禄宫主星" + ("、".join(star_names) if star_names else "无主星"),
             "weight": "中性",
         })
     return {

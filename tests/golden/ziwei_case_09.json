@@ -39,7 +39,10 @@
       "疾厄": {
         "position": "寅",
         "major_stars": [
-          "贪狼"
+          {
+            "name": "贪狼",
+            "brightness": "平"
+          }
         ],
         "minor_stars": [],
         "adopted_stars": [
@@ -53,8 +56,14 @@
       "财帛": {
         "position": "卯",
         "major_stars": [
-          "天机",
-          "巨门"
+          {
+            "name": "天机",
+            "brightness": "旺"
+          },
+          {
+            "name": "巨门",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "左辅",
@@ -68,8 +77,14 @@
       "子女": {
         "position": "辰",
         "major_stars": [
-          "紫微",
-          "天相"
+          {
+            "name": "紫微",
+            "brightness": "得"
+          },
+          {
+            "name": "天相",
+            "brightness": "得"
+          }
         ],
         "minor_stars": [
           "文昌",
@@ -85,7 +100,10 @@
       "夫妻": {
         "position": "巳",
         "major_stars": [
-          "天梁"
+          {
+            "name": "天梁",
+            "brightness": "陷"
+          }
         ],
         "minor_stars": [
           "天马",
@@ -104,7 +122,10 @@
       "兄弟": {
         "position": "午",
         "major_stars": [
-          "七杀"
+          {
+            "name": "七杀",
+            "brightness": "旺"
+          }
         ],
         "minor_stars": [
           "禄存"
@@ -131,7 +152,10 @@
       "父母": {
         "position": "申",
         "major_stars": [
-          "廉贞"
+          {
+            "name": "廉贞",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "天钺"
@@ -160,7 +184,10 @@
       "田宅": {
         "position": "戌",
         "major_stars": [
-          "破军"
+          {
+            "name": "破军",
+            "brightness": "旺"
+          }
         ],
         "minor_stars": [
           "文曲"
@@ -174,7 +201,10 @@
       "官禄": {
         "position": "亥",
         "major_stars": [
-          "天同"
+          {
+            "name": "天同",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "右弼"
@@ -190,8 +220,14 @@
       "仆役": {
         "position": "子",
         "major_stars": [
-          "武曲",
-          "天府"
+          {
+            "name": "武曲",
+            "brightness": "旺"
+          },
+          {
+            "name": "天府",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [
           "天魁"
@@ -208,8 +244,14 @@
       "迁移": {
         "position": "丑",
         "major_stars": [
-          "太阳",
-          "太阴"
+          {
+            "name": "太阳",
+            "brightness": "不"
+          },
+          {
+            "name": "太阴",
+            "brightness": "庙"
+          }
         ],
         "minor_stars": [],
         "adopted_stars": [

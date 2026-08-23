@@ -38,6 +38,14 @@ LIUYAO_RELATIVES = {"兄弟", "子孙", "妻财", "官鬼", "父母"}
 # 铁板条文引文（「」『』“”等引号内 ≥4 字视为条文引用声称）
 _TIEBAN_QUOTE_RE = re.compile(r"[「『“\"]([^」』”\"]{4,60})[」』”\"]")
 
+# 安全校验模式：首条保留 v1 原语义（不削弱既有覆盖），其余为分域扩展
+_SAFETY_PATTERNS = [
+    ("绝对化承诺", r"(包治|保证.*(发财|治好|离婚)|一定.*(发财|成功))"),
+    ("医疗越界", r"(可以停药|不必就医|不必治疗|代替医生|代替医院|包治百病|开出药方)"),
+    ("法律越界", r"(必胜诉|诉讼必胜|保证无罪|案件必赢|罪名成立)"),
+    ("财务保证", r"(稳赚不赔|保本保息|必涨|稳赚|内幕消息|零风险)"),
+]
+
 
 @dataclass
 class ValidationReport:
@@ -69,8 +77,10 @@ class Critic:
     # ---- Chart Validator ----
 
     def _check_ziwei(self, text: str, chart: Dict[str, Any]) -> List[str]:
+        # 引擎输出星曜为 {name, brightness} dict;兼容旧的字符串形态
         palace_map = {
-            name: set(p.get("major_stars", []))
+            name: {s["name"] if isinstance(s, dict) else s
+                   for s in p.get("major_stars", [])}
             for name, p in chart.get("palaces", {}).items()
         }
         chart_stars = set()
@@ -236,15 +246,41 @@ class Critic:
                     issues.append("紫微命盘宫位数不是 12")
         return issues
 
-    # ---- 预留：Hallucination / Safety ----
+    # ---- Hallucination / Safety ----
 
-    def check_hallucination(self, draft_answer: str, citations: Optional[List[str]] = None) -> List[str]:
-        """占位：结合 citation_checker 实现完整溯源校验（Phase 4）。"""
-        return []
+    def check_hallucination(self, draft_answer: str,
+                            citations: Optional[List[str]] = None,
+                            store: Optional[Any] = None) -> List[str]:
+        """引用溯源校验：LLM 文本中的 [source:id] 声称必须可追溯。
+
+        基准优先级：本次检索返回的 citations（最严格——LLM 只能引用
+        本次真实检索到的来源）；否则退回知识库 store 的存在性校验；
+        两者皆缺时不校验（无事实基准，不产生臆断）。
+        """
+        from rag.citation_checker import extract_citations
+        claimed = list(dict.fromkeys(extract_citations(draft_answer)))
+        if not claimed:
+            return []
+        issues: List[str] = []
+        if citations:
+            allowed = set(extract_citations("\n".join(citations)))
+            for sid in claimed:
+                if sid not in allowed:
+                    issues.append(f"引用声称不符：[source:{sid}] 不在本次检索结果中")
+        elif store is not None:
+            for sid in claimed:
+                if not store.exists(sid):
+                    issues.append(f"引用声称不符：[source:{sid}] 不存在于知识库")
+        return issues
 
     def check_safety(self, draft_answer: str) -> List[str]:
-        """占位：安全校验（医疗/法律/财务等敏感承诺检测）。"""
-        issues = []
-        if re.search(r"(包治|保证.*(发财|治好|离婚)|一定.*(发财|成功))", draft_answer):
-            issues.append("检测到绝对化承诺表述，需拒绝或弱化")
+        """安全校验：医疗/法律/财务越界与绝对化承诺检测。
+
+        仅检测"术数回答越界给出专业承诺"的表述；正常的文化推演
+        与免责声明不应命中（见 tests/agents/test_critic.py）。
+        """
+        issues: List[str] = []
+        for label, pattern in _SAFETY_PATTERNS:
+            if re.search(pattern, draft_answer):
+                issues.append(f"检测到{label}表述，需拒绝或弱化")
         return issues

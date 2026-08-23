@@ -77,7 +77,11 @@ class ZiWeiEngine(BaseEngine):
 
         palaces = {}
         for palace in data.get("palaces", []):
-            major = [s["name"] for s in palace.get("major_stars", [])]
+            # 保留 py-iztro 的 brightness（庙旺得利平不陷），供 validator 亮度校验
+            major = [
+                {"name": s["name"], "brightness": s.get("brightness", "")}
+                for s in palace.get("major_stars", [])
+            ]
             minor = [s["name"] for s in palace.get("minor_stars", [])]
             adopted = [s["name"] for s in palace.get("adjective_stars", [])]
             decadal = palace.get("decadal") or {}
