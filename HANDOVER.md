@@ -57,6 +57,19 @@ cmake --build build --target example_zhouyi_cli --config Release
 
 中文输出乱码时：`chcp 65001` 或设 `PYTHONIOENCODING=utf-8`。
 
+### 1.4 补记（2026-08-23 Windows 接手实际执行）
+
+- **环境**：本机无 VS/MSYS2，实际走 **路线 C：WinLibs GCC 16.1**（winget `BrechtSanders.WinLibs.POSIX.UCRT`，自带 cmake 4.4 / ninja / gcc 16.1，无需另装）；Python 3.11.9 经 winget 安装（3.12 无 sxtwl==2.0.7 wheel，勿用）。
+- **配置命令**（注意必须带 experimental UUID，否则 CMake 不给 GCC 开 `import std`）：
+  ```powershell
+  cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++ -DBUILD_EXAMPLES=ON -DZHOUYILAB_MODULE_MODE=LOCAL `
+        -DCMAKE_CXX_MODULE_STD=ON `
+        -DCMAKE_EXPERIMENTAL_CXX_IMPORT_STD=f35a9ac6-8463-4d38-8eec-5d6008153e7d
+  cmake --build build --target example_zhouyi_cli
+  ```
+- **fork 新增 3 处构建修复**（`lu422407/ZhouYiLab`，基于 c528744，**尚未推送，本地工作树**）：①`3rdparty/magic_enum/module/magic_enum.cppm` GCC 下强制 header 模式（import std + purview 文本包含 mingw CRT 头会声明冲突）并补 `<format>`；②`CMakeLists.txt` GNU+WIN32 链接 `stdc++exp`（WinLibs 把 `__write_to_terminal` 等放这库）；③同处 `-static` 全静态（免疫系统里 Git-Bash mingw64 的旧 libstdc++-6.dll 抢载）+ `--allow-multiple-definition`（COFF 无 section group，std 模块内联局部静态每 TU 强定义，同一 BMI 实体取首即可）。**下次接手：先把这两处 fork 改动 commit/push 到 `lu422407/ZhouYiLab`，再更新主仓 submodule 指针。**
+- 验证结果：`cli_available()=True`，全量 **12,211 passed 0 skipped**（+9 新用例：critic 补 tieban×7、RAG 类别交错×2），覆盖率 **85.3%**（红线 80%）。
+
 ---
 
 ## 2. 当前项目状态（截至 2026-08-22）

@@ -6,7 +6,7 @@
 
 ---
 
-## 一、本轮已解决（2026-08-22 第三批）
+## 一、本轮已解决（2026-08-22 第三批 · 2026-08-23 Windows 接手续做）
 
 | # | 原问题 | 解决方式 |
 |---|--------|----------|
@@ -20,14 +20,15 @@
 | 7 | `validate_liuren` 是空骨架 | 结构层校验：四课 4 项、三传 3 传、天地盘 12 支 |
 | 8 | 亮度表数据无自检（validate_ziwei 字符串契约下空转问题的一半） | 新增 `validate_brightness_table()`：宫位不得同时列两个亮度档（现有 4 星数据通过；扩表时 CI 兜底） |
 | 9 | （前一批）CI 不编 C++、奇门链路静默 skip | cpp-cli job：Linux clang-20/libc++ 编译并真跑全量，"出现 skip 即失败" |
+| 10 | Critic 补 tieban（原二档 #2） | `_check_tieban`：条文号（"条文5001"/"第5001条"/TB-R 编号）与引文（引号内 ≥4 字，支持片段）必须来自本盘考刻实际命中的条文（predicted_tiaowen/details），防 LLM 编造；引擎降级无条文时不误报 |
+| 11 | RAG 首条偏置（原二档 #3） | `_collect_citations` 按 category 轮转交错（类内保分数序、类别序 sorted 确定性），classics/rules/cases 各占一席后再按分补齐，缓解 `classic_ziwei_001` 类霸榜 |
+| 12 | （2026-08-23）Windows 无 VS/MSYS2，ZhouYiLab CLI 编译路径不通 | WinLibs GCC 16.1 + CMake 4.4（`CMAKE_CXX_MODULE_STD` + experimental UUID）编译成功；fork 三处修复：magic_enum 模块在 GCC 下走 header 模式（purview 文本包含 mingw CRT 头与 import std 冲突）、补 `<format>` 头、链接 `stdc++exp` + `-static`（CLI 自包含，免疫 DLL 地狱） |
 
 ## 二、可解决待做（技术无障碍，按价值排序）
 
 1. **validate_ziwei 亮度校验对字符串契约生效**：需要引擎输出亮度字段（py-iztro 原始数据里有 `brightness`，`ziwei_engine.py` 目前丢弃了）或改为查表比对。改引擎输出会破坏 10 个紫微黄金用例，需同步再固化。
-2. **Critic 补 tieban**：真实条文已于第四批入库（12,000 条，见 SOURCES.md），素材不再是阻塞——可校验"考刻结果引用的条文号/正文"与库中一致，防 LLM 编造条文号。
-3. **RAG 首条偏置缓解**：检索结果按分数排序，`classic_ziwei_001` 几乎总在前列；可在编排层按 category 去重（classics/rules/cases 各取一条）提高多样性。
-4. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。
-5. **critic.check_hallucination / check_safety 做实**：前者可接 citation_checker（模块现成），后者目前只有一条正则。
+2. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。
+3. **critic.check_hallucination / check_safety 做实**：前者可接 citation_checker（模块现成），后者目前只有一条正则。
 
 ## 三、需要决策（做不做/怎么做取决于产品形态）
 
