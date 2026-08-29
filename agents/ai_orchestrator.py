@@ -444,8 +444,9 @@ class AIOrchestrator:
                     )
                 )
                 continue
-            # 六壬：占卜时刻由 divination_datetime 决定（缺省回落 birth_datetime）
-            if system == "liuren" and parsed_params.get("divination_datetime"):
+            # 六壬/奇门/六爻以占时起盘：占卜时刻由 divination_datetime 决定
+            # （缺省回落 birth_datetime，各引擎内处理）
+            if system in ("liuren", "qimen", "liuyao") and parsed_params.get("divination_datetime"):
                 engine_input = dict(engine_input)
                 engine_input["divination_datetime"] = parsed_params["divination_datetime"]
             try:
@@ -667,7 +668,9 @@ class AIOrchestrator:
             elif system == "bazi":
                 pillars = chart.get("pillars", {})
                 if pillars:
-                    parts = [f"{k}:{v.get('stem', '')}{v.get('branch', '')}" for k, v in pillars.items()]
+                    zh = {"year": "年", "month": "月", "day": "日", "hour": "时"}
+                    parts = [f"{zh.get(k, k)}:{v.get('stem', '')}{v.get('branch', '')}"
+                             for k, v in pillars.items()]
                     lines.append("四柱：" + " ".join(parts))
             elif system == "tieban":
                 vk = chart.get("verified_ke")

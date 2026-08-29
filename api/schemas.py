@@ -67,7 +67,7 @@ class EngineQueryRequest(BaseModel):
     calendar: str = Field("solar", pattern="^(solar|lunar)$")
     gender: str = Field("男")
     divination_datetime: Optional[str] = Field(
-        None, description="占卜时刻（六壬用），缺省回落 birth_datetime"
+        None, description="占卜时刻（奇门/六爻/六壬用），缺省回落 birth_datetime"
     )
     known_facts: Optional[Dict[str, str]] = Field(
         None, description="已知事实（铁板考刻用，如 father_zodiac/mother_zodiac）"

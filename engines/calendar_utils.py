@@ -132,6 +132,20 @@ def resolve_solar_datetime(input_data: Dict[str, Any]) -> datetime:
     return dt
 
 
+def resolve_divination_datetime(input_data: Dict[str, Any]) -> datetime:
+    """占卜时刻解析：优先 divination_datetime，缺省回落出生时间。
+
+    奇门/六爻等以「占时」起盘的引擎共用。占卜时刻按公历 ISO 串
+    解析（与 API 契约一致），真太阳时校正语义与出生时间相同。
+    """
+    if input_data.get("divination_datetime"):
+        data = dict(input_data)
+        data["birth_datetime"] = input_data["divination_datetime"]
+        data["calendar"] = "solar"
+        return resolve_solar_datetime(data)
+    return resolve_solar_datetime(input_data)
+
+
 def lunar_to_solar(lunar_year: int, lunar_month: int, lunar_day: int,
                    is_leap: bool = False, hour: int = 12, minute: int = 0) -> datetime:
     """农历转公历。闰月需显式标注 is_leap=True。"""

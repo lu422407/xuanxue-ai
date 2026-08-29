@@ -28,7 +28,8 @@ class QiMenEngine(BaseEngine):
 
     def calculate(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         normalized = self.validate_input(input_data)
-        solar = cu.resolve_solar_datetime(normalized)
+        # 奇门以占时起盘：优先 divination_datetime，缺省回落出生时间
+        solar = cu.resolve_divination_datetime(normalized)
         try:
             result = zhouyi_bridge.calculate_qi_men({
                 "year": solar.year,
@@ -44,13 +45,16 @@ class QiMenEngine(BaseEngine):
             )
 
         pan = result.get("pan", {})
+        input_echo = {
+            "birth_datetime": normalized["birth_datetime"],
+            "timezone_offset": normalized.get("timezone_offset", 8.0),
+            "calendar": normalized.get("calendar", "solar"),
+            "gender": normalized.get("gender", "男"),
+        }
+        if normalized.get("divination_datetime"):
+            input_echo["divination_datetime"] = normalized["divination_datetime"]
         return {
-            "input_echo": {
-                "birth_datetime": normalized["birth_datetime"],
-                "timezone_offset": normalized.get("timezone_offset", 8.0),
-                "calendar": normalized.get("calendar", "solar"),
-                "gender": normalized.get("gender", "男"),
-            },
+            "input_echo": input_echo,
             "system": self.system,
             "dun": pan.get("dun"),
             "dun_zh": pan.get("dun_zh"),

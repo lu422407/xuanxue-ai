@@ -36,7 +36,8 @@ class LiuYaoEngine(BaseEngine):
 
     def calculate(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         normalized = self.validate_input(input_data)
-        solar = cu.resolve_solar_datetime(normalized)
+        # 六爻按占时定日辰/起六神：优先 divination_datetime，缺省回落出生时间
+        solar = cu.resolve_divination_datetime(normalized)
         code = normalized["main_hexagram_code"]
         changing_lines = normalized.get("changing_lines") or []
         try:
@@ -58,15 +59,18 @@ class LiuYaoEngine(BaseEngine):
             )
 
         pan = result.get("pan", {})
+        input_echo = {
+            "birth_datetime": normalized["birth_datetime"],
+            "timezone_offset": normalized.get("timezone_offset", 8.0),
+            "calendar": normalized.get("calendar", "solar"),
+            "gender": normalized.get("gender", "男"),
+            "main_hexagram_code": code,
+            "changing_lines": changing_lines,
+        }
+        if normalized.get("divination_datetime"):
+            input_echo["divination_datetime"] = normalized["divination_datetime"]
         return {
-            "input_echo": {
-                "birth_datetime": normalized["birth_datetime"],
-                "timezone_offset": normalized.get("timezone_offset", 8.0),
-                "calendar": normalized.get("calendar", "solar"),
-                "gender": normalized.get("gender", "男"),
-                "main_hexagram_code": code,
-                "changing_lines": changing_lines,
-            },
+            "input_echo": input_echo,
             "system": self.system,
             "ben_gua_name": pan.get("ben_gua_name"),
             "ba_zi": pan.get("ba_zi"),

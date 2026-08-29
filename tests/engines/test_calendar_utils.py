@@ -46,3 +46,26 @@ def test_lunar_info():
 def test_validation_errors(bad):
     with pytest.raises(EngineError):
         cu.validate_birth_input(bad)
+
+# ---- 占卜时刻解析（奇门/六爻占时起盘） ----
+
+_BASE = {"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar"}
+
+
+def test_divination_datetime_takes_priority():
+    dt = cu.resolve_divination_datetime(dict(_BASE, divination_datetime="2026-08-29 10:00:00"))
+    assert (dt.year, dt.month, dt.day, dt.hour, dt.minute) == (2026, 8, 29, 10, 0)
+
+
+def test_divination_datetime_falls_back_to_birth():
+    dt = cu.resolve_divination_datetime(dict(_BASE))
+    assert (dt.year, dt.month, dt.day) == (1990, 5, 1)
+
+
+def test_divination_datetime_with_true_solar_time_applied():
+    # 真太阳时校正语义同样适用于占卜时刻（经度 120 以东为正修正）
+    raw = cu.resolve_divination_datetime(dict(_BASE, divination_datetime="2026-08-29 10:00:00"))
+    corrected = cu.resolve_divination_datetime(dict(
+        _BASE, divination_datetime="2026-08-29 10:00:00",
+        true_solar_time=True, longitude=121.47))
+    assert corrected != raw
