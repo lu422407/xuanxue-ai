@@ -202,7 +202,7 @@ async function runCase3(btn) {
     if (res.ok && res.data) {
       const c = res.data.result || res.data;
       friendly = '【奇门盘】' + (c.solar_term || '-') + '　' + (c.dun_zh || '-') +
-        (c.dun || '-') + '　' + (c.yuan || '-') + '元 ' + (c.ju || '-') + ' 局' +
+        '　' + (c.yuan_zh || '-') + '　' + (c.ju || '-') + ' 局' +
         '\n【直符】' + (c.zhi_fu_star || '-') + '　【直使】' + (c.zhi_shi_gate || '-') +
         '\n（判定锚点：处暑／阴遁／4 局／天冲／伤）';
     }
@@ -229,8 +229,7 @@ async function runCase4(btn) {
       const list = tw.slice(0, 5).map(t =>
         '· [' + (t.category || '') + '] ' + (t.text || '')).join('\n');
       friendly = '【考刻定分】' + (c.kefen_string || '-') +
-        '（' + (c.verified_ke != null ? c.verified_ke : '-') + '刻' +
-        (c.verified_fen != null ? c.verified_fen : '-') + '分）　置信度 ' + conf +
+        '　置信度 ' + conf +
         '\n【命中条文】' + tw.length + ' 条，前 5 条：\n' + (list || '（无）');
     }
     show(4, res, friendly);
