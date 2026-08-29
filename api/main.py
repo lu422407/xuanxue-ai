@@ -3,9 +3,13 @@
 鉴权 + 限流 + Tracing + Cost Tracker + 数据主权（删除命盘）。
 """
 
+from pathlib import Path
 from typing import Dict, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from agents.ai_orchestrator import AIOrchestrator, _METHOD_TO_SYSTEM
 from agents.critic import Critic
@@ -34,7 +38,32 @@ from observability.cost_tracker import cost_tracker
 from observability.tracing import tracer
 from src.router import XuanXueRouter
 
-app = FastAPI(title="术数 AI Engine Pro", version="0.1.0")
+# Swagger 资源本地化：/docs 不依赖 jsdelivr 等 CDN（内嵌浏览器/离线环境
+# 下 CDN 不通会导致页面空白）。docs_url=None 禁用内置 CDN 版路由，
+# 由下方自定义 /docs 接管
+app = FastAPI(title="术数 AI Engine Pro", version="0.1.0",
+              docs_url=None, redoc_url=None)
+
+# Swagger 资源本地化：/docs 不依赖 jsdelivr 等 CDN（内嵌浏览器/离线环境
+# 下 CDN 不通会导致页面空白）
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+
+
+@app.get("/docs", include_in_schema=False)
+def custom_docs():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=app.title + " - Swagger UI",
+        swagger_js_url="/static/swagger/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger/swagger-ui.css",
+    )
+
+
+@app.get("/acceptance", include_in_schema=False)
+def acceptance_page():
+    """人工验收页（中文，自包含，无外部资源）。"""
+    return FileResponse(_STATIC_DIR / "acceptance" / "index.html")
 
 # 多术数 AI 编排器（离线确定性，llm=None）：
 # 复用既有 XuanXueRouter 实例，避免重复加载引擎。

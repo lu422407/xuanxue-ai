@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>术数 AI · 端到端验收</title>
+<style>
+  body { font-family: system-ui, "Microsoft YaHei", sans-serif; max-width: 960px;
+         margin: 24px auto; padding: 0 16px; color: #222; background: #fafafa; }
+  h1 { font-size: 22px; } h2 { font-size: 17px; margin-bottom: 4px; }
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+          padding: 14px 16px; margin: 14px 0; }
+  .hint { color: #666; font-size: 13px; line-height: 1.6; }
+  .key { font-size: 13px; margin: 8px 0; }
+  input, textarea { font-family: inherit; font-size: 13px; border: 1px solid #ccc;
+                    border-radius: 4px; padding: 6px; }
+  input { width: 220px; } textarea { width: 100%; box-sizing: border-box; }
+  button { background: #2563eb; color: #fff; border: 0; border-radius: 4px;
+           padding: 7px 18px; font-size: 14px; cursor: pointer; margin-top: 6px; }
+  button:disabled { background: #9db8e8; }
+  pre { background: #f4f4f4; border: 1px solid #e2e2e2; border-radius: 6px;
+        padding: 10px; font-size: 12.5px; white-space: pre-wrap;
+        word-break: break-all; max-height: 420px; overflow: auto; }
+  .ok { color: #0a7d32; font-weight: 600; } .bad { color: #c02626; font-weight: 600; }
+  .status { font-size: 13px; margin: 6px 0; }
+</style>
+</head>
+<body>
+<h1>术数 AI · 端到端人工验收</h1>
+<p class="hint">四个用例按顺序做，每个点「发送」后对照判定点看结果。
+整体要回答的问题：<b>排盘要素是否齐全合理、答案读起来是否通顺可信、有无乱码。</b>
+（术数结论本身的正确性由后续跨库交叉验证负责，今天判可用性与自洽。）</p>
+<div class="key">API 密钥 <input id="key" value="dev-key-0001">
+　限流 10 次/分钟，429 时稍等几秒再点。</div>
+
+<div class="card" id="c1">
+  <h2>① 全链路编排 /api/orchestrate（核心体验）</h2>
+  <p class="hint">判定点：四柱应为 <b>年:庚午 月:庚辰 日:丙寅 时:壬辰</b>；「命宫主星：无」是真实盘面
+  （此生辰紫微在子女宫，命宫借用对宫星）；末尾有「参考」引用（含 [source:…]）与免责声明。
+  <b>答案整体读起来像一份通顺的分析吗？</b></p>
+  <textarea id="b1" rows="4">{"question": "我是男，1990年5月1日8点30分生，看看事业运如何", "user_context": {"birth_input": {"year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}}}</textarea>
+  <button onclick="send('/api/orchestrate','b1','r1')">发送</button>
+  <div class="status" id="s1"></div><pre id="r1" hidden></pre>
+</div>
+
+<div class="card" id="c2">
+  <h2>② 确定性命盘 /api/chart</h2>
+  <p class="hint">判定点：bazi 四柱同上；ziwei 应有 <b>12 个宫</b>，主星形如
+  {"name":"紫微","brightness":"庙"}，亮度取值限于 庙/旺/得/利/平/不/陷。</p>
+  <textarea id="b2" rows="3">{"birth_input": {"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男"}}</textarea>
+  <button onclick="send('/api/chart','b2','r2')">发送</button>
+  <div class="status" id="s2"></div><pre id="r2" hidden></pre>
+</div>
+
+<div class="card" id="c3">
+  <h2>③ 奇门占时 /api/engine/qimen</h2>
+  <p class="hint">判定点：占卜时刻 2026-08-29 10:00 → 应为
+  <b>处暑 / 阴遁 / 4 局 / 直符天冲 / 直使伤</b>（已与 C++ 引擎直调核对一致）。
+  可把 divination_datetime 改成其它日期，节气与局数应随之变化。</p>
+  <textarea id="b3" rows="3">{"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男", "divination_datetime": "2026-08-29 10:00:00"}</textarea>
+  <button onclick="send('/api/engine/qimen','b3','r3')">发送</button>
+  <div class="status" id="s3"></div><pre id="r3" hidden></pre>
+</div>
+
+<div class="card" id="c4">
+  <h2>④ 铁板考刻 /api/engine/tieban</h2>
+  <p class="hint">判定点：返回 verified_ke/fen（考刻定分）、kefen_string、命中文条文列表
+  （known_facts 匹配越好 confidence 越高；本例约 150 条），
+  条文应有真实正文（如「欲借杨枝水，几尘不染心。」这类句子），不应出现编造乱文。</p>
+  <textarea id="b4" rows="4">{"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男", "known_facts": {"father_zodiac": "龙", "mother_zodiac": "蛇", "siblings": "3"}}</textarea>
+  <button onclick="send('/api/engine/tieban','b4','r4')">发送</button>
+  <div class="status" id="s4"></div><pre id="r4" hidden></pre>
+</div>
+
+<p class="hint">另可试：/api/engine/liuren（同③结构，月将应随占时变化）、
+/api/analyze/{orchestrate 返回的 trace_id}（看 8 段执行链路耗时）。
+回报格式：每个用例「过 / 不过」+ 一句理由。</p>
+
+<script>
+async function send(path, bodyId, resId) {
+  const btn = event.target; btn.disabled = true;
+  const status = document.getElementById('s' + resId.slice(1));
+  const pre = document.getElementById(resId);
+  status.textContent = '请求中…'; status.className = 'status'; pre.hidden = true;
+  try {
+    const resp = await fetch(path, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-API-Key': document.getElementById('key').value.trim()},
+      body: document.getElementById(bodyId).value
+    });
+    const text = await resp.text();
+    status.innerHTML = resp.ok
+      ? '<span class="ok">HTTP ' + resp.status + ' ✓</span>'
+      : '<span class="bad">HTTP ' + resp.status + ' ✗</span>';
+    try { pre.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+    catch (e) { pre.textContent = text; }
+    pre.hidden = false;
+  } catch (err) {
+    status.innerHTML = '<span class="bad">请求失败：' + err + '</span>';
+  } finally { btn.disabled = false; }
+}
+</script>
+</body>
+</html>
