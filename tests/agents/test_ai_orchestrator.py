@@ -339,3 +339,25 @@ def test_run_records_trace_spans_and_cost():
         assert f"ai_orchestrator.{stage}" in spans, f"缺 span: {stage}"
     cost = cost_tracker.get(r.trace_id)
     assert cost and "bazi" in cost["engines"]
+
+
+def test_minute_flows_through_question_and_birth_input():
+    # 「8点30分」文本解析出分钟；birth_input.minute 覆盖同样生效
+    orch = _orch()
+    r1 = orch.run({"question": "我是男，1990年5月1日8点30分生，看看事业",
+                   "user_context": {}})
+    echo1 = r1.engine_results["bazi"]["input_echo"]["birth_datetime"]
+    assert "08:30:00" in echo1, echo1
+    r2 = orch.run({"question": "看看事业",
+                   "user_context": {"birth_input": {
+                       "year": 1990, "month": 5, "day": 1,
+                       "hour": 8, "minute": 30, "gender": "男"}}})
+    echo2 = r2.engine_results["bazi"]["input_echo"]["birth_datetime"]
+    assert "08:30:00" in echo2, echo2
+
+
+def test_build_input_includes_minute():
+    from src.router import XuanXueRouter
+    dt = XuanXueRouter().build_input(
+        {"year": 1990, "month": 5, "day": 1, "hour": 8, "minute": 30})
+    assert dt["birth_datetime"] == "1990-05-01 08:30:00"

@@ -345,20 +345,32 @@ class AIOrchestrator:
                 params["day"] = int(m.group(4))
                 params["date_type"] = "lunar" if m.group(2) in ("农历", "阴历") else "solar"
 
-        # 3) 时辰 / 点位
+        # 3) 时辰 / 点位（「8点30分」同样提取分钟；显式 08:30 形式优先）
         if "hour" not in params:
             hm = re.search(r"(\d{1,2}):(\d{2})", text)
             if hm:
                 params["hour"] = int(hm.group(1))
+                params["minute"] = int(hm.group(2))
             else:
-                hm2 = re.search(r"(\d{1,2})\s*点", text)
+                hm2 = re.search(r"(\d{1,2})\s*点(?:\s*(\d{1,2})\s*分?)?", text)
                 if hm2:
                     params["hour"] = int(hm2.group(1))
+                    if hm2.group(2):
+                        params["minute"] = int(hm2.group(2))
                 else:
                     for name, hour in _HOUR_MAP.items():
                         if name in text:
                             params["hour"] = hour
                             break
+        # 3.5) 分钟独立补抓：router 抽取只取整点（已设 hour 但无 minute）
+        if "minute" not in params:
+            mm = re.search(r"点\s*(\d{1,2})\s*分", text)
+            if mm:
+                params["minute"] = int(mm.group(1))
+            else:
+                mc = re.search(r"\d{1,2}:(\d{2})", text)
+                if mc:
+                    params["minute"] = int(mc.group(1))
 
         # 4) 性别
         if "gender" not in params:
@@ -371,8 +383,8 @@ class AIOrchestrator:
         ctx = request.user_context or {}
         bi = ctx.get("birth_input")
         if isinstance(bi, dict):
-            for k in ("year", "month", "day", "hour", "gender", "calendar",
-                      "timezone_offset", "divination_datetime"):
+            for k in ("year", "month", "day", "hour", "minute", "gender",
+                      "calendar", "timezone_offset", "divination_datetime"):
                 if bi.get(k) is not None:
                     params[k] = bi[k]
             if bi.get("calendar"):

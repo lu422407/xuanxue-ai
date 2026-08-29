@@ -169,10 +169,11 @@ class XuanXueRouter:
         month = params.get("month")
         day = params.get("day")
         hour = params.get("hour", 12)
+        minute = params.get("minute", 0)
         if not (year and month and day):
             raise ValueError("缺少出生日期参数")
 
-        birth_datetime = f"{year:04d}-{month:02d}-{day:02d} {hour:02d}:00:00"
+        birth_datetime = f"{year:04d}-{month:02d}-{day:02d} {hour:02d}:{minute:02d}:00"
         return {
             "birth_datetime": birth_datetime,
             "timezone_offset": timezone_offset,

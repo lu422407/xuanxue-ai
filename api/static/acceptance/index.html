@@ -7,97 +7,235 @@
 <style>
   body { font-family: system-ui, "Microsoft YaHei", sans-serif; max-width: 960px;
          margin: 24px auto; padding: 0 16px; color: #222; background: #fafafa; }
-  h1 { font-size: 22px; } h2 { font-size: 17px; margin-bottom: 4px; }
+  h1 { font-size: 22px; } h2 { font-size: 17px; margin-bottom: 6px; }
   .card { background: #fff; border: 1px solid #ddd; border-radius: 8px;
           padding: 14px 16px; margin: 14px 0; }
-  .hint { color: #666; font-size: 13px; line-height: 1.6; }
+  .hint { color: #666; font-size: 13px; line-height: 1.7; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+         font-size: 14px; margin: 8px 0; }
   .key { font-size: 13px; margin: 8px 0; }
-  input, textarea { font-family: inherit; font-size: 13px; border: 1px solid #ccc;
-                    border-radius: 4px; padding: 6px; }
-  input { width: 220px; } textarea { width: 100%; box-sizing: border-box; }
+  input, select { font-family: inherit; font-size: 14px; border: 1px solid #ccc;
+                  border-radius: 4px; padding: 6px; }
+  input[type=number] { width: 76px; } input[type=text].w { width: 90px; }
+  input[type=text].q { width: 200px; }
   button { background: #2563eb; color: #fff; border: 0; border-radius: 4px;
-           padding: 7px 18px; font-size: 14px; cursor: pointer; margin-top: 6px; }
+           padding: 8px 22px; font-size: 14px; cursor: pointer; }
   button:disabled { background: #9db8e8; }
   pre { background: #f4f4f4; border: 1px solid #e2e2e2; border-radius: 6px;
         padding: 10px; font-size: 12.5px; white-space: pre-wrap;
-        word-break: break-all; max-height: 420px; overflow: auto; }
+        word-break: break-all; max-height: 360px; overflow: auto; }
+  .answer { background: #eef6ee; border: 1px solid #cfe3cf; }
   .ok { color: #0a7d32; font-weight: 600; } .bad { color: #c02626; font-weight: 600; }
   .status { font-size: 13px; margin: 6px 0; }
+  details { margin-top: 8px; font-size: 13px; }
+  summary { cursor: pointer; color: #2563eb; }
+  b.res { font-size: 15px; }
 </style>
 </head>
 <body>
 <h1>术数 AI · 端到端人工验收</h1>
-<p class="hint">四个用例按顺序做，每个点「发送」后对照判定点看结果。
-整体要回答的问题：<b>排盘要素是否齐全合理、答案读起来是否通顺可信、有无乱码。</b>
-（术数结论本身的正确性由后续跨库交叉验证负责，今天判可用性与自洽。）</p>
+<p class="hint">下面都用<b>正常中文和数字</b>填，不需要写代码。点「发送」后对照每个用例的判定点看结果。
+要回答的核心问题：<b>排盘要素是否齐全合理、答案读起来是否通顺可信、有无乱码</b>
+（术数结论本身的正确性由后续跨库交叉验证负责，今天判可用性与自洽）。</p>
 <div class="key">API 密钥 <input id="key" value="dev-key-0001">
-　限流 10 次/分钟，429 时稍等几秒再点。</div>
+　限流 10 次/分钟，出现 429 就等几秒再点。</div>
 
-<div class="card" id="c1">
-  <h2>① 全链路编排 /api/orchestrate（核心体验）</h2>
-  <p class="hint">判定点：四柱应为 <b>年:庚午 月:庚辰 日:丙寅 时:壬辰</b>；「命宫主星：无」是真实盘面
-  （此生辰紫微在子女宫，命宫借用对宫星）；末尾有「参考」引用（含 [source:…]）与免责声明。
-  <b>答案整体读起来像一份通顺的分析吗？</b></p>
-  <textarea id="b1" rows="4">{"question": "我是男，1990年5月1日8点30分生，看看事业运如何", "user_context": {"birth_input": {"year": 1990, "month": 5, "day": 1, "hour": 8, "gender": "男"}}}</textarea>
-  <button onclick="send('/api/orchestrate','b1','r1')">发送</button>
-  <div class="status" id="s1"></div><pre id="r1" hidden></pre>
+<div class="card">
+  <h2>① 全链路编排（核心体验）</h2>
+  <p class="hint">判定点：答案里的四柱应为 <b>年:庚午 月:庚辰 日:丙寅 时:壬辰</b>；
+  「命宫主星：无」是真实盘面（此生辰紫微在子女宫，命宫借用对宫星）；
+  末尾有「参考」引用和免责声明。<b>答案整体读起来像一份通顺的分析吗？</b></p>
+  <div class="row">
+    性别 <select id="a_gender"><option>男</option><option>女</option></select>
+    出生 <input type="number" id="a_y" value="1990" min="1900" max="2100"> 年
+         <input type="number" id="a_m" value="5" min="1" max="12"> 月
+         <input type="number" id="a_d" value="1" min="1" max="31"> 日
+         <input type="number" id="a_h" value="8" min="0" max="23"> 点
+         <input type="number" id="a_mi" value="30" min="0" max="59"> 分
+    想问 <input type="text" id="a_topic" class="q" value="事业"> 运如何
+  </div>
+  <button onclick="runCase1(this)">发送</button>
+  <div class="status" id="s1"></div>
+  <pre id="r1" class="answer" hidden></pre>
+  <pre id="j1" hidden></pre><details id="d1" hidden><summary>完整返回数据</summary><pre id="x1"></pre></details>
 </div>
 
-<div class="card" id="c2">
-  <h2>② 确定性命盘 /api/chart</h2>
-  <p class="hint">判定点：bazi 四柱同上；ziwei 应有 <b>12 个宫</b>，主星形如
-  {"name":"紫微","brightness":"庙"}，亮度取值限于 庙/旺/得/利/平/不/陷。</p>
-  <textarea id="b2" rows="3">{"birth_input": {"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男"}}</textarea>
-  <button onclick="send('/api/chart','b2','r2')">发送</button>
-  <div class="status" id="s2"></div><pre id="r2" hidden></pre>
+<div class="card">
+  <h2>② 确定性命盘</h2>
+  <p class="hint">判定点：显示八字四柱与紫微命宫主星；紫微应有 <b>12 个宫</b>，
+  主星亮度限于 庙/旺/得/利/平/不/陷。</p>
+  <div class="row">
+    性别 <select id="b_gender"><option>男</option><option>女</option></select>
+    出生日期 <input type="date" id="b_date" value="1990-05-01">
+    时间 <input type="time" id="b_time" value="08:30">
+  </div>
+  <button onclick="runCase2(this)">发送</button>
+  <div class="status" id="s2"></div>
+  <pre id="r2" hidden></pre>
+  <details id="d2" hidden><summary>完整返回数据</summary><pre id="x2"></pre></details>
 </div>
 
-<div class="card" id="c3">
-  <h2>③ 奇门占时 /api/engine/qimen</h2>
+<div class="card">
+  <h2>③ 奇门遁甲（占时起盘）</h2>
   <p class="hint">判定点：占卜时刻 2026-08-29 10:00 → 应为
-  <b>处暑 / 阴遁 / 4 局 / 直符天冲 / 直使伤</b>（已与 C++ 引擎直调核对一致）。
-  可把 divination_datetime 改成其它日期，节气与局数应随之变化。</p>
-  <textarea id="b3" rows="3">{"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男", "divination_datetime": "2026-08-29 10:00:00"}</textarea>
-  <button onclick="send('/api/engine/qimen','b3','r3')">发送</button>
-  <div class="status" id="s3"></div><pre id="r3" hidden></pre>
+  <b>处暑 / 阴遁 / 4 局 / 直符天冲 / 直使伤</b>（已与 C++ 引擎直调核对）。
+  换一个占卜日期再发一次，节气和局数应随之变化。</p>
+  <div class="row">
+    性别 <select id="c_gender"><option>男</option><option>女</option></select>
+    占卜日期 <input type="date" id="c_date" value="2026-08-29">
+    时间 <input type="time" id="c_time" value="10:00">
+  </div>
+  <button onclick="runCase3(this)">发送</button>
+  <div class="status" id="s3"></div>
+  <pre id="r3" hidden></pre>
+  <details id="d3" hidden><summary>完整返回数据</summary><pre id="x3"></pre></details>
 </div>
 
-<div class="card" id="c4">
-  <h2>④ 铁板考刻 /api/engine/tieban</h2>
-  <p class="hint">判定点：返回 verified_ke/fen（考刻定分）、kefen_string、命中文条文列表
-  （known_facts 匹配越好 confidence 越高；本例约 150 条），
-  条文应有真实正文（如「欲借杨枝水，几尘不染心。」这类句子），不应出现编造乱文。</p>
-  <textarea id="b4" rows="4">{"birth_datetime": "1990-05-01 08:30:00", "timezone_offset": 8, "calendar": "solar", "gender": "男", "known_facts": {"father_zodiac": "龙", "mother_zodiac": "蛇", "siblings": "3"}}</textarea>
-  <button onclick="send('/api/engine/tieban','b4','r4')">发送</button>
-  <div class="status" id="s4"></div><pre id="r4" hidden></pre>
+<div class="card">
+  <h2>④ 铁板神数（考刻）</h2>
+  <p class="hint">判定点：返回考刻定分与命中的真实条文
+  （正文应为通顺古文，不应有编造乱文）；已知事实填得越准，置信度越高。</p>
+  <div class="row">
+    出生日期 <input type="date" id="e_date" value="1990-05-01">
+    时间 <input type="time" id="e_time" value="08:30">
+    性别 <select id="e_gender"><option>男</option><option>女</option></select>
+  </div>
+  <div class="row">
+    父亲生肖 <input type="text" id="e_father" class="w" value="龙">
+    母亲生肖 <input type="text" id="e_mother" class="w" value="蛇">
+    兄弟姊妹数 <input type="number" id="e_sib" value="3" min="0" max="20">
+  </div>
+  <button onclick="runCase4(this)">发送</button>
+  <div class="status" id="s4"></div>
+  <pre id="r4" hidden></pre>
+  <details id="d4" hidden><summary>完整返回数据</summary><pre id="x4"></pre></details>
 </div>
 
-<p class="hint">另可试：/api/engine/liuren（同③结构，月将应随占时变化）、
-/api/analyze/{orchestrate 返回的 trace_id}（看 8 段执行链路耗时）。
-回报格式：每个用例「过 / 不过」+ 一句理由。</p>
+<p class="hint">回报格式：每个用例「过 / 不过」+ 一句理由。
+完整返回数据里可核对 input_echo 回显、[source:…] 引用、12 宫明细等。</p>
 
 <script>
-async function send(path, bodyId, resId) {
-  const btn = event.target; btn.disabled = true;
-  const status = document.getElementById('s' + resId.slice(1));
-  const pre = document.getElementById(resId);
-  status.textContent = '请求中…'; status.className = 'status'; pre.hidden = true;
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+
+async function callAPI(path, body) {
+  const resp = await fetch(path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json',
+              'X-API-Key': $('key').value.trim()},
+    body: JSON.stringify(body)
+  });
+  const text = await resp.text();
+  let data = null;
+  try { data = JSON.parse(text); } catch (e) {}
+  return {ok: resp.ok, status: resp.status, data, text};
+}
+
+function show(i, result, friendly) {
+  const s = $('s' + i), r = $('r' + i), d = $('d' + i);
+  s.innerHTML = result.ok
+    ? '<span class="ok">HTTP ' + result.status + ' ✓</span>'
+    : '<span class="bad">HTTP ' + result.status + ' ✗</span>' +
+      (result.data && result.data.detail ? '　' + JSON.stringify(result.data.detail) : '');
+  r.hidden = false; r.textContent = friendly;
+  if (result.data) {
+    $('x' + i).textContent = JSON.stringify(result.data, null, 2);
+    d.hidden = false;
+  }
+}
+
+async function runCase1(btn) {
+  btn.disabled = true; $('s1').textContent = '请求中…';
   try {
-    const resp = await fetch(path, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-API-Key': document.getElementById('key').value.trim()},
-      body: document.getElementById(bodyId).value
-    });
-    const text = await resp.text();
-    status.innerHTML = resp.ok
-      ? '<span class="ok">HTTP ' + resp.status + ' ✓</span>'
-      : '<span class="bad">HTTP ' + resp.status + ' ✗</span>';
-    try { pre.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-    catch (e) { pre.textContent = text; }
-    pre.hidden = false;
-  } catch (err) {
-    status.innerHTML = '<span class="bad">请求失败：' + err + '</span>';
-  } finally { btn.disabled = false; }
+    const g = $('a_gender').value, topic = $('a_topic').value.trim() || '事业';
+    const bi = {year: +$('a_y').value, month: +$('a_m').value, day: +$('a_d').value,
+                hour: +$('a_h').value, minute: +$('a_mi').value, gender: g};
+    const question = '我是' + g + '，' + bi.year + '年' + bi.month + '月' + bi.day +
+                     '日' + bi.hour + '点' + bi.minute + '分生，看看' + topic + '运如何';
+    const res = await callAPI('/api/orchestrate', {question, user_context: {birth_input: bi}});
+    let friendly = '（未取到答案）\n' + (res.text || '');
+    if (res.ok && res.data) {
+      friendly = '【答案】\n' + (res.data.answer || '（空）') +
+        '\n\n【引用】' + ((res.data.synthesis && res.data.synthesis.citations || []).length) + ' 条' +
+        '　【调用引擎】' + (res.data.systems_invoked || []).join('、') +
+        '　【trace_id】' + (res.data.trace_id || '-');
+    }
+    show(1, res, friendly);
+  } catch (err) { $('s1').innerHTML = '<span class="bad">请求失败：' + err + '</span>'; }
+  finally { btn.disabled = false; }
+}
+
+async function runCase2(btn) {
+  btn.disabled = true; $('s2').textContent = '请求中…';
+  try {
+    const dt = $('b_date').value + ' ' + $('b_time').value + ':00';
+    const res = await callAPI('/api/chart',
+      {birth_input: {birth_datetime: dt, timezone_offset: 8, calendar: 'solar',
+                     gender: $('b_gender').value}});
+    let friendly = res.text || '';
+    if (res.ok && res.data) {
+      const c = res.data.chart || {};
+      const p = (c.bazi && c.bazi.pillars) || {};
+      const zh = {year: '年', month: '月', day: '日', hour: '时'};
+      const gz = Object.keys(p).map(k => zh[k] + ':' + p[k].stem + p[k].branch).join(' ');
+      const pal = (c.ziwei && c.ziwei.palaces) || {};
+      const ming = pal['命宫'] || {};
+      const stars = (ming.major_stars || []).map(s =>
+        typeof s === 'string' ? s : s.name + '(' + (s.brightness || '－') + ')').join('、');
+      friendly = '【八字四柱】' + (gz || '-') +
+        '\n【紫微】命宫居' + (ming.position || '-') + '，主星：' + (stars || '无（借对宫）') +
+        '，共 ' + Object.keys(pal).length + ' 宫';
+    }
+    show(2, res, friendly);
+  } catch (err) { $('s2').innerHTML = '<span class="bad">请求失败：' + err + '</span>'; }
+  finally { btn.disabled = false; }
+}
+
+async function runCase3(btn) {
+  btn.disabled = true; $('s3').textContent = '请求中…';
+  try {
+    const div = $('c_date').value + ' ' + $('c_time').value + ':00';
+    const res = await callAPI('/api/engine/qimen',
+      {birth_datetime: '1990-05-01 08:30:00', timezone_offset: 8, calendar: 'solar',
+       gender: $('c_gender').value, divination_datetime: div});
+    let friendly = res.text || '';
+    if (res.ok && res.data) {
+      const c = res.data.result || res.data;
+      friendly = '【奇门盘】' + (c.solar_term || '-') + '　' + (c.dun_zh || '-') +
+        (c.dun || '-') + '　' + (c.yuan || '-') + '元 ' + (c.ju || '-') + ' 局' +
+        '\n【直符】' + (c.zhi_fu_star || '-') + '　【直使】' + (c.zhi_shi_gate || '-') +
+        '\n（判定锚点：处暑／阴遁／4 局／天冲／伤）';
+    }
+    show(3, res, friendly);
+  } catch (err) { $('s3').innerHTML = '<span class="bad">请求失败：' + err + '</span>'; }
+  finally { btn.disabled = false; }
+}
+
+async function runCase4(btn) {
+  btn.disabled = true; $('s4').textContent = '请求中…';
+  try {
+    const dt = $('e_date').value + ' ' + $('e_time').value + ':00';
+    const res = await callAPI('/api/engine/tieban',
+      {birth_datetime: dt, timezone_offset: 8, calendar: 'solar',
+       gender: $('e_gender').value,
+       known_facts: {father_zodiac: $('e_father').value.trim(),
+                     mother_zodiac: $('e_mother').value.trim(),
+                     siblings: String($('e_sib').value)}});
+    let friendly = res.text || '';
+    if (res.ok && res.data) {
+      const c = res.data.result || res.data;
+      const tw = c.predicted_tiaowen || [];
+      const conf = (c.confidence != null) ? Math.round(c.confidence * 100) + '%' : '-';
+      const list = tw.slice(0, 5).map(t =>
+        '· [' + (t.category || '') + '] ' + (t.text || '')).join('\n');
+      friendly = '【考刻定分】' + (c.kefen_string || '-') +
+        '（' + (c.verified_ke != null ? c.verified_ke : '-') + '刻' +
+        (c.verified_fen != null ? c.verified_fen : '-') + '分）　置信度 ' + conf +
+        '\n【命中条文】' + tw.length + ' 条，前 5 条：\n' + (list || '（无）');
+    }
+    show(4, res, friendly);
+  } catch (err) { $('s4').innerHTML = '<span class="bad">请求失败：' + err + '</span>'; }
+  finally { btn.disabled = false; }
 }
 </script>
 </body>
