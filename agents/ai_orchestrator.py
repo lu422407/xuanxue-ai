@@ -72,6 +72,14 @@ _HOUR_MAP = {
     "午时": 12, "未时": 14, "申时": 16, "酉时": 18, "戌时": 20, "亥时": 22,
 }
 
+# 话题意图 → 紫微宫位（宫位键名不带"宫"字，显示时补；
+# 确定性摘要据以正面回应用户所问领域）
+_TOPIC_PALACE = {
+    "career": "官禄",
+    "wealth": "财帛",
+    "relationship": "夫妻",
+}
+
 # ---- Phase B：五行生克映射（纯函数，供八字↔紫微交叉印证） ----
 
 TIAN_GAN_WUXING: Dict[str, str] = {
@@ -293,7 +301,8 @@ class AIOrchestrator:
 
         # ⑦ Explainer —— LLM 生成解释（失败回退原始命盘）
         with tracer.span(trace_id, "ai_orchestrator.explain"):
-            answer = self._explain(engine_results, synthesis, validation, trace_id)
+            answer = self._explain(engine_results, synthesis, validation,
+                                   trace_id, intent_type=intent.type)
 
         # 引用附于 Critic 校验之后：引用来自知识库本身，可由 citation_checker 复核
         if synthesis.citations:
@@ -624,15 +633,16 @@ class AIOrchestrator:
         synthesis: SynthesisResult,
         validation: Dict[str, Any],
         trace_id: Optional[str] = None,
+        intent_type: str = "",
     ) -> str:
         if self.llm is not None:
             try:
                 text = self._llm_explain(engine_results, synthesis, trace_id)
             except Exception as exc:
                 logger.warning("LLM 解释失败，回退确定性摘要: %s", exc)
-                text = self._text_summary(engine_results, synthesis)
+                text = self._text_summary(engine_results, synthesis, intent_type)
         else:
-            text = self._text_summary(engine_results, synthesis)
+            text = self._text_summary(engine_results, synthesis, intent_type)
 
         # Critic：若 LLM 文本与命盘不符，回退原始命盘摘要（绝不传播编造内容）
         report: ValidationReport = self.critic.validate(text, engine_results)
@@ -646,7 +656,7 @@ class AIOrchestrator:
                 logger.warning("Critic %s校验不通过：%s", tag, found)
         if self.llm is not None and (
                 not report.passed or halluc_issues or safety_issues):
-            text = self._text_summary(engine_results, synthesis)
+            text = self._text_summary(engine_results, synthesis, intent_type)
         return text
 
     def _llm_explain(
@@ -667,16 +677,46 @@ class AIOrchestrator:
         return resp.get("content", "")
 
     @staticmethod
-    def _text_summary(engine_results: Dict[str, Any], synthesis: SynthesisResult) -> str:
-        """确定性文本摘要：只回显引擎真实字段，不编造。"""
+    def _text_summary(engine_results: Dict[str, Any], synthesis: SynthesisResult,
+                      intent_type: str = "") -> str:
+        """确定性文本摘要：只回显引擎真实字段，不编造。
+
+        话题宫位映射：intent（career/wealth/relationship）→ 紫微对应宫位，
+        让摘要至少正面回应一次用户的提问主题。
+        """
         lines: List[str] = []
         for system, chart in engine_results.items():
             lines.append(f"【{system}】")
             if system == "ziwei":
-                ming = chart.get("palaces", {}).get("命宫", {})
+                palaces = chart.get("palaces", {})
+                ming = palaces.get("命宫", {})
                 stars = ming.get("major_stars", [])
-                star_names = [s["name"] if isinstance(s, dict) else s for s in stars]
-                lines.append(f"命宫主星：{', '.join(star_names) if star_names else '无'}")
+                if stars:
+                    star_names = [s["name"] if isinstance(s, dict) else s
+                                  for s in stars]
+                    lines.append(f"命宫主星：{', '.join(star_names)}")
+                else:
+                    # 命宫无主星是正常盘面（借对宫安星），必须说明，避免误解为空盘
+                    borrowed = palaces.get("迁移", {}).get("major_stars", [])
+                    borrow_names = [
+                        s["name"] if isinstance(s, dict) else s for s in borrowed]
+                    if borrow_names:
+                        lines.append(
+                            "命宫主星：无（此盘命宫无主星，借对宫「迁移宫」主星 "
+                            + "、".join(borrow_names) + " 参断）")
+                    else:
+                        lines.append("命宫主星：无")
+                # 话题宫位：把用户所问的领域对应到紫微宫位
+                topic_palace = _TOPIC_PALACE.get(intent_type)
+                if topic_palace and topic_palace in palaces:
+                    t_stars = palaces[topic_palace].get("major_stars", [])
+                    t_names = [s["name"] if isinstance(s, dict) else s
+                               for s in t_stars]
+                    if t_names:
+                        lines.append(f"{topic_palace}宫主星（就你所问的领域）：{', '.join(t_names)}")
+                    else:
+                        lines.append(
+                            f"{topic_palace}宫无主星（借其对宫参断）")
             elif system == "bazi":
                 pillars = chart.get("pillars", {})
                 if pillars:

@@ -361,3 +361,23 @@ def test_build_input_includes_minute():
     dt = XuanXueRouter().build_input(
         {"year": 1990, "month": 5, "day": 1, "hour": 8, "minute": 30})
     assert dt["birth_datetime"] == "1990-05-01 08:30:00"
+
+
+def test_text_summary_explains_empty_ming_and_topic_palace():
+    # ① 命宫无主星（此生辰真实盘面）必须说明借对宫参断，而非干巴巴的"无"
+    # ② 问事业 → 摘要应正面给出官禄宫主星
+    r = _orch().run({
+        "question": "我是男，1990年5月1日8点30分生，看看事业",
+        "user_context": {"birth_input": {
+            "year": 1990, "month": 5, "day": 1, "hour": 8, "minute": 30,
+            "gender": "男"}},
+    })
+    ziwei_part = r.answer.split("【ziwei】")[1]
+    assert "迁移宫" in ziwei_part and "参断" in ziwei_part, ziwei_part
+    assert "官禄宫" in ziwei_part, ziwei_part
+
+
+def test_text_summary_no_topic_palace_for_general_intent():
+    # 不带话题（general）时不应出现话题宫位行
+    r = _orch().run({"question": "你好呀，介绍一下命盘", "user_context": {}})
+    assert "就你所问的领域" not in r.answer
