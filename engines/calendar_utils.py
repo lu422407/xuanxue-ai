@@ -86,6 +86,7 @@ def validate_birth_input(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _parse_datetime_string(s: str) -> datetime:
+    """解析公历 YYYY-MM-DD HH:MM[:SS]，非法日期抛 EngineError。"""
     s = s.strip()
     match = re.match(
         r"^(\d{4})-(\d{1,2})-(\d{1,2})[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?$", s
@@ -102,7 +103,42 @@ def _parse_datetime_string(s: str) -> datetime:
         raise EngineError(
             f"出生年份超出 sxtwl 支持范围 [-3000, 3000]: {y}", code="YEAR_OUT_OF_RANGE"
         )
-    return datetime(y, mo, d, h, mi, sec)
+    try:
+        return datetime(y, mo, d, h, mi, sec)
+    except ValueError as exc:
+        raise EngineError(f"出生时间非法: {s}（{exc}）", code="INVALID_DATETIME")
+
+
+def _parse_lunar_datetime_string(s: str) -> Tuple[int, int, int, int, int]:
+    """解析农历 YYYY-MM-DD HH:MM[:SS]，返回 (年, 月, 日, 时, 分)。
+
+    **不能复用 `_parse_datetime_string`**：后者以公历 `datetime` 构造，
+    而合法农历日可能是公历不存在的日期（如农历二月三十 1981-02-30，
+    公历无 2 月 30 日），会被公历月长校验误拒。此处只做范围校验，
+    日期是否真实存在交由 `lunar_to_solar` 的往返校验判定。
+    """
+    s = s.strip()
+    # 时间部分可省略（沿用原行为：缺省 12:00）
+    match = re.match(
+        r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$", s
+    )
+    if not match:
+        raise EngineError(
+            f"birth_datetime 格式必须为 YYYY-MM-DD HH:MM[:SS]，收到: {s}",
+            code="INVALID_DATETIME",
+        )
+    y, mo, d = int(match.group(1)), int(match.group(2)), int(match.group(3))
+    h = int(match.group(4)) if match.group(4) else 12
+    mi = int(match.group(5)) if match.group(5) else 0
+    if not (1 <= mo <= 12 and 0 <= h <= 23 and 0 <= mi <= 59):
+        raise EngineError(f"农历日期非法: {s}", code="INVALID_DATETIME")
+    if not (1 <= d <= 30):
+        raise EngineError(f"农历日期非法: {s}（农历月最多 30 天）", code="INVALID_DATETIME")
+    if y < -3000 or y > 3000:
+        raise EngineError(
+            f"出生年份超出 sxtwl 支持范围 [-3000, 3000]: {y}", code="YEAR_OUT_OF_RANGE"
+        )
+    return y, mo, d, h, mi
 
 
 def resolve_solar_datetime(input_data: Dict[str, Any]) -> datetime:
@@ -115,14 +151,14 @@ def resolve_solar_datetime(input_data: Dict[str, Any]) -> datetime:
     if calendar == "solar":
         dt = _parse_datetime_string(input_data["birth_datetime"])
     else:
-        # 农历输入：日期部分 + 时间部分分开解析
-        lunar_str = input_data["birth_datetime"]
-        parts = lunar_str.split(" ")
-        date_part, time_part = parts[0], parts[1] if len(parts) > 1 else "12:00:00"
-        lunar_dt = _parse_datetime_string(f"{date_part} {time_part}")
-        dt = lunar_to_solar(lunar_dt.year, lunar_dt.month, lunar_dt.day,
+        # 农历输入：日期与时间分开解析，且**必须走农历专用解析**
+        # （合法农历日可能是公历不存在的日期，用公历 datetime 构造会误拒）。
+        # 日期是否真实存在由 lunar_to_solar 的往返校验判定。
+        lunar_y, lunar_m, lunar_d, lunar_h, lunar_mi = _parse_lunar_datetime_string(
+            input_data["birth_datetime"])
+        dt = lunar_to_solar(lunar_y, lunar_m, lunar_d,
                             is_leap=input_data.get("lunar_is_leap", False),
-                            hour=lunar_dt.hour, minute=lunar_dt.minute)
+                            hour=lunar_h, minute=lunar_mi)
 
     if input_data.get("true_solar_time"):
         lon = float(input_data["longitude"])
@@ -148,10 +184,48 @@ def resolve_divination_datetime(input_data: Dict[str, Any]) -> datetime:
 
 def lunar_to_solar(lunar_year: int, lunar_month: int, lunar_day: int,
                    is_leap: bool = False, hour: int = 12, minute: int = 0) -> datetime:
-    """农历转公历。闰月需显式标注 is_leap=True。"""
-    day = sxtwl.fromLunar(lunar_year, lunar_month, lunar_day, is_leap)
+    """农历转公历。闰月需显式标注 is_leap=True。
+
+    非法的农历月/日（如某年四月只有 29 天却传 30）必须显式报错：
+    `sxtwl.fromLunar` 对这类输入**不报错而是静默回卷**到相邻日期
+    （实测 fromLunar(1990,4,30) 返回公历 1990-05-24 并自称农历 5/1），
+    等于把用户输入的日期悄悄换成另一天 —— 静默错误比报错更危险。
+
+    校验方式：往返比对（fromLunar 结果再读回农历月/日/闰月是否与输入一致）。
+    已在 1900-2100 共 144,720 个 (年,月,日,闰月) 组合上验证：
+    合法日期（含闰月）往返全部一致，非法日期全部被识别。
+    """
+    try:
+        day = sxtwl.fromLunar(lunar_year, lunar_month, lunar_day, is_leap)
+    except Exception as exc:
+        raise EngineError(
+            f"农历日期非法: {lunar_year}年{lunar_month}月{lunar_day}日"
+            f"{'（闰月）' if is_leap else ''}：{exc}",
+            code="INVALID_LUNAR_DATE",
+        )
+
+    # 往返校验：sxtwl 会静默回卷非法日期，必须自行拦截
+    if (day.getLunarMonth() != lunar_month
+            or day.getLunarDay() != lunar_day
+            or bool(day.isLunarLeap()) != bool(is_leap)):
+        raise EngineError(
+            f"农历日期不存在: {lunar_year}年{lunar_month}月{lunar_day}日"
+            f"{'（闰月）' if is_leap else ''}"
+            f"（该月共 {_lunar_month_days(lunar_year, lunar_month, is_leap)} 天）",
+            code="INVALID_LUNAR_DATE",
+        )
+
     return datetime(day.getSolarYear(), day.getSolarMonth(), day.getSolarDay(),
                     hour, minute)
+
+
+def _lunar_month_days(lunar_year: int, lunar_month: int, is_leap: bool) -> int:
+    """该农历月的实际天数（29 或 30），仅用于错误信息。"""
+    for days in (30, 29):
+        probe = sxtwl.fromLunar(lunar_year, lunar_month, days, is_leap)
+        if probe.getLunarMonth() == lunar_month and probe.getLunarDay() == days:
+            return days
+    return 29
 
 
 def true_solar_time_correction(dt: datetime, longitude: float) -> timedelta:

@@ -66,6 +66,9 @@ class EngineQueryRequest(BaseModel):
     timezone_offset: float = Field(8.0, ge=-12, le=14)
     calendar: str = Field("solar", pattern="^(solar|lunar)$")
     gender: str = Field("男")
+    lunar_is_leap: bool = Field(False, description="农历输入是否为闰月")
+    true_solar_time: bool = Field(False, description="是否启用真太阳时校正（需同时提供 longitude）")
+    longitude: Optional[float] = Field(None, ge=-180, le=180, description="经度，真太阳时校正用")
     divination_datetime: Optional[str] = Field(
         None, description="占卜时刻（奇门/六爻/六壬用），缺省回落 birth_datetime"
     )

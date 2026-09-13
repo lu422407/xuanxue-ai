@@ -177,7 +177,13 @@ def query_engine(system: str, req: EngineQueryRequest,
         "timezone_offset": req.timezone_offset,
         "calendar": req.calendar,
         "gender": req.gender,
+        # 真太阳时校正与农历闰月标志必须透传：否则引擎侧支持而 API 层不可达，
+        # 用户传了 true_solar_time 也静默无效（与 chart 端点语义不一致）
+        "true_solar_time": req.true_solar_time,
+        "lunar_is_leap": req.lunar_is_leap,
     }
+    if req.longitude is not None:
+        input_data["longitude"] = req.longitude
     if req.divination_datetime:
         input_data["divination_datetime"] = req.divination_datetime
     resp = _AI_ORCH.run_single(system, input_data, known_facts=req.known_facts)
