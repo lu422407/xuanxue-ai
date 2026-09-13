@@ -7,6 +7,10 @@
 
 注意：大六壬为占卜术，起课时间应是「占卜时刻」。本引擎在
 input_data 中优先读取 divination_datetime，缺省回落 birth_datetime。
+
+历法与时间处理统一走 `calendar_utils.resolve_divination_datetime`
+（农历换算、真太阳时校正与奇门/六爻同语义），禁止在本引擎内自行解析时间——
+否则 calendar=lunar 与 true_solar_time 会被静默忽略（曾为静默错误）。
 """
 
 import logging
@@ -57,9 +61,12 @@ class LiuRenEngine(BaseEngine):
         normalized = self.validate_input(input_data)
         GetLi, GetShiChen, ShiPan = _lazy_daluren()
 
-        # 占卜时间：优先 divination_datetime，缺省回落出生时间
+        # 占卜时间：优先 divination_datetime，缺省回落出生时间。
+        # 解析统一走 calendar_utils（农历换算 + 真太阳时校正），
+        # 与奇门/六爻同语义；在本引擎内自行解析会静默忽略
+        # calendar=lunar 与 true_solar_time（历史缺陷）。
         divination = normalized.get("divination_datetime") or normalized.get("birth_datetime")
-        solar = cu._parse_datetime_string(divination)
+        solar = cu.resolve_divination_datetime(normalized)
 
         try:
             li = GetLi(solar.year, solar.month, solar.day,
@@ -88,6 +95,9 @@ class LiuRenEngine(BaseEngine):
         si_ke = pan.四课
         san_chuan = pan.三传
 
+        # input_echo 由 build_input_echo 统一构造：启用真太阳时校正时会带上
+        # solar_datetime_after_correction（即真正用于起课的时刻），
+        # 避免回显撒谎（历史缺陷：曾标 true_solar_time_applied=true 却回显未校正值）。
         return {
             "system": self.system,
             "engine_version": self.version,

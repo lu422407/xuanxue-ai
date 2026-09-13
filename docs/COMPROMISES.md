@@ -3,6 +3,8 @@
 > 2026-08-22 全面审计产出。记录项目在"红线声明 vs 实际执行"上的所有已知差距，
 > 分为四档：**本轮已解决 / 可解决待做 / 需要决策 / 受约束暂不可解决**。
 > 原则：占位数据不得标记真实、降级必须可见、红线要么执行要么改声明。
+>
+> 最后更新：2026-09-13（新增一档 #17 六壬占时语义对齐；二档新增非法农历日期静默回卷）
 
 ---
 
@@ -27,6 +29,7 @@
 | 14 | check_hallucination / check_safety 是占位（原二档 #3） | ①check_hallucination 接 citation_checker：`[source:id]` 声称须在本次检索结果（或知识库）中存在，无基准不臆断；②check_safety 扩展医疗越界/法律越界/财务保证三域（保留 v1 绝对化承诺原语义）；③两者接线进 `_explain` 回退门（与命盘校验同权：触发即回退确定性摘要+warning 日志），不留死代码 |
 | 15 | （2026-08-29 端到端验收发现）奇门/六爻静默无视占卜时刻 | 传了 divination_datetime 时奇门/六爻仍按出生时刻起盘（六壬一直正确）——静默错误结果比报错更危险。修复：`calendar_utils.resolve_divination_datetime()`（优先占时、缺省回落、占时同样适用真太阳时校正），两引擎接入并在 input_echo 回显；编排层 dispatch 占时透传从仅六壬放开至奇门/六爻；schema 描述同步。新增 5 测试（回落逻辑×3 + 引擎级×2，CLI 缺失时 skip）；验收实盘与 CLI 直调锚点逐字一致（处暑/阴遁4局/天冲/伤） |
 | 16 | （同日）`/api/orchestrate` 确定性摘要四柱显示英文键名 | 摘要改为 年:庚午 月:庚辰 日:丙寅 时:壬辰（纯展示层，确定性测试仅锚定两轮一致+包含关系，不受影响） |
+| 17 | （原二档#2）六壬占卜时刻未对齐 `resolve_divination_datetime` | `liuren_engine` 自行 `_parse_datetime_string` 绕过 `calendar_utils`，造成**两个静默错误**：①`calendar="lunar"` 被静默忽略 → 按公历起课（实测农历 1990-04-07 日柱得 `壬寅`，应为 `丙寅`）；②`true_solar_time` 被静默忽略 → 占时不校正，且 `input_echo` 标 `true_solar_time_applied=true` 却回显未校正值（**回显撒谎**）。修复：占时解析改走 `cu.resolve_divination_datetime`，与奇门/六爻同语义。实测经度 91.5E 占时由巳时正确退到辰时；农历路径与 `BaziEngine` 四柱逐字一致。新增 4 测试；六壬黄金用例逐字不变 |
 
 ## 一.5、端到端验收（2026-08-29 首次真实 API 冒烟，Windows 本机）
 
@@ -38,7 +41,7 @@
 ## 二、可解决待做（技术无障碍，按价值排序）
 
 1. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。**自用定位下降为低优先**（本机无 Docker 无法验证，需配 CI docker-build job 才算闭环）。
-2. **六壬占卜时刻未应用真太阳时校正**：`liuren_engine` 直接 `_parse_datetime_string` 占时（无 true_solar_time/longitude 处理），与新的 `resolve_divination_datetime`（奇门/六爻用）语义不一致；对齐即可，注意六壬黄金用例回归。
+2. **非法农历日期被静默回卷**（2026-09-13 排查六壬占时时发现，影响**全部** `calendar="lunar"` 输入）：`sxtwl.fromLunar` 对不存在的农历日**不报错而是回卷**——如 `fromLunar(1990, 4, 30)`（该年四月仅 29 天）返回公历 `1990-05-24` 并自称农历 `5/1`，即用户输入的日期被静默换成另一天。八字/紫微/六壬三引擎共用 `calendar_utils` 解析路径，故均受影响。**修法已验证可行**：`lunar_to_solar` 内加往返校验（`fromLunar` 结果再 `getLunarMonth/Day/isLunarLeap` 比对，合法日期含闰月全部往返一致，非法日期 mismatch）后抛 `EngineError`。**待决策**：改动落在共享历法层（被三引擎依赖），且 `calendar_utils` 属"排盘计算内核"范畴，需用户确认后再做。
 
 ## 三、需要决策（做不做/怎么做取决于产品形态）
 
