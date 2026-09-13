@@ -162,8 +162,20 @@ class XuanXueRouter:
             facts[key] = match.group(2)
         return facts
 
+    # 可选参数：仅在 params 显式提供时才写入 input_data，
+    # 缺省一律不写（保持既有 4 键行为与引擎各自默认值不变）。
+    _OPTIONAL_INPUT_KEYS = (
+        "true_solar_time", "longitude", "lunar_is_leap",
+        "bazi_subhour_rule", "school", "fix_leap",
+    )
+
     def build_input(self, params: Dict[str, Any], timezone_offset: float = 8.0) -> Dict[str, Any]:
-        """把路由解析出的参数转成 BaseEngine 兼容的 input_data。"""
+        """把路由解析出的参数转成 BaseEngine 兼容的 input_data。
+
+        除基础四键外，透传显式给出的流派/校正参数（真太阳时、闰月标志、
+        早晚子时流派、紫微流派）。**不透传即为静默忽略**：用户传了
+        true_solar_time 却按默认起盘，属静默错误（同 API 层已修缺陷）。
+        """
         date_type = params.get("date_type", "solar")
         year = params.get("year")
         month = params.get("month")
@@ -174,12 +186,17 @@ class XuanXueRouter:
             raise ValueError("缺少出生日期参数")
 
         birth_datetime = f"{year:04d}-{month:02d}-{day:02d} {hour:02d}:{minute:02d}:00"
-        return {
+        result: Dict[str, Any] = {
             "birth_datetime": birth_datetime,
             "timezone_offset": timezone_offset,
             "calendar": date_type,
             "gender": params.get("gender", "男"),
         }
+        for key in self._OPTIONAL_INPUT_KEYS:
+            value = params.get(key)
+            if value is not None:
+                result[key] = value
+        return result
 
     def _get_setup_hint(self, method: str) -> str:
         hints = {

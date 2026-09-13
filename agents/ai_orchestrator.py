@@ -388,22 +388,119 @@ class AIOrchestrator:
             elif "女" in text:
                 params["gender"] = "女"
 
+        # 4.5) 流派 / 校正参数（自然语言常见表述）
+        self._extract_preference_params(text, params)
+
         # 5) user_context.birth_input 覆盖（设计稿请求协议支持）
         ctx = request.user_context or {}
         bi = ctx.get("birth_input")
         if isinstance(bi, dict):
+            # 5.0) birth_datetime 字符串拆分。设计稿 §3.1 允许直接传
+            # birth_datetime（而非 year/month/day 分量），但 build_input 只认
+            # 分量 —— 不拆分会导致整个 birth_input 静默失效（实测报
+            # "缺少出生日期参数"）。显式分量优先于字符串拆分值。
+            self._apply_birth_datetime_string(bi, params)
             for k in ("year", "month", "day", "hour", "minute", "gender",
-                      "calendar", "timezone_offset", "divination_datetime"):
+                      "calendar", "timezone_offset", "divination_datetime",
+                      # 流派 / 校正参数：显式传入必须透传，否则静默无效
+                      "true_solar_time", "longitude", "lunar_is_leap",
+                      "bazi_subhour_rule", "school", "fix_leap",
+                      "divination_birth_year", "question"):
                 if bi.get(k) is not None:
                     params[k] = bi[k]
             if bi.get("calendar"):
                 params["date_type"] = bi["calendar"]
+
+        # 5.5) 编排层顶层同名字段（user_context 直接平铺时的兼容）
+        for k in ("true_solar_time", "longitude", "lunar_is_leap",
+                  "bazi_subhour_rule", "school"):
+            if params.get(k) is None and ctx.get(k) is not None:
+                params[k] = ctx[k]
 
         # 6) user_context 顶层 divination_datetime（设计稿请求协议 3.1）
         if params.get("divination_datetime") is None and ctx.get("divination_datetime"):
             params["divination_datetime"] = ctx["divination_datetime"]
 
         return params
+
+    # ---- ④ 前置：流派 / 校正参数的自然语言抽取 ----
+
+    @staticmethod
+    def _apply_birth_datetime_string(bi: Dict[str, Any], params: Dict[str, Any]) -> None:
+        """把 birth_input.birth_datetime 字符串拆成 year/month/day/hour/minute。
+
+        `router.build_input` 只认日期**分量**，因此设计稿 §3.1 那种直接传
+        `birth_datetime` 的写法若不拆分会使整个 birth_input 静默失效
+        （实测报"缺少出生日期参数"）。显式分量优先级更高，故本方法只填
+        缺失的分量（调用后在覆盖循环中显式值会再覆盖一次）。
+        """
+        raw = bi.get("birth_datetime")
+        if not isinstance(raw, str):
+            return
+        m = re.match(
+            r"^(\d{4})-(\d{1,2})-(\d{1,2})"
+            r"(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?\s*$", raw.strip())
+        if not m:
+            return  # 格式不符则交由后续校验报错，不在这里臆断
+        if bi.get("year") is None and params.get("year") is None:
+            params["year"] = int(m.group(1))
+        if bi.get("month") is None and params.get("month") is None:
+            params["month"] = int(m.group(2))
+        if bi.get("day") is None and params.get("day") is None:
+            params["day"] = int(m.group(3))
+        if m.group(4) and bi.get("hour") is None and params.get("hour") is None:
+            params["hour"] = int(m.group(4))
+        if m.group(5) and bi.get("minute") is None and params.get("minute") is None:
+            params["minute"] = int(m.group(5))
+
+    def _extract_preference_params(self, text: str, params: Dict[str, Any]) -> None:
+        """从自然语言抽取流派 / 校正参数（仅在未显式给出时）。
+
+        防误判：只在出现**明确的参数化措辞**时生效（如"用真太阳时""早子时换日"
+        "按三合派"），避免把"我是研究风水的""命宫在哪"这类叙述当成参数。
+        显式 user_context 覆盖优先级更高（在调用方之后执行）。
+        """
+        if not text:
+            return
+
+        # 真太阳时校正：需"用/按/启用/开启"等明确措辞（避免"真太阳时是什么"
+        # 这类提问被当成参数），并要求有经度才真正生效
+        if params.get("true_solar_time") is None:
+            if re.search(r"(?:用|按|启用|开启|应用|采用)\s*真太阳时|真太阳时校正", text):
+                params["true_solar_time"] = True
+                if params.get("longitude") is None:
+                    m = re.search(
+                        r"经度\s*[:：]?\s*(\d{1,3}(?:\.\d+)?)\s*[度°]?"
+                        r"|东经\s*(\d{1,3}(?:\.\d+)?)", text)
+                    if m:
+                        params["longitude"] = float(m.group(1) or m.group(2))
+
+        # 早晚子时流派
+        if params.get("bazi_subhour_rule") is None:
+            if re.search(r"早子时|晚子时|子时换日|子正换日|23点换日|零点换日", text):
+                if re.search(r"早子时|晚子时|23点换日", text):
+                    params["bazi_subhour_rule"] = "early_zi"
+                else:
+                    params["bazi_subhour_rule"] = "midnight"
+
+        # 紫微流派：必须带"派/流派"等明确措辞。
+        # 只认裸词会误判术数术语叙述（实测"有没有三合局""想了解飞星是什么"
+        # 都会被裸词规则错当成流派选择）。
+        if params.get("school") is None:
+            school_map = [
+                (r"三合派|三合流派", "sanhe"),
+                (r"飞星派|飞星流派", "feixing"),
+                (r"中州派|中州流派", "zhongzhou"),
+                (r"钦天派|钦天流派", "qintian"),
+            ]
+            for pattern, value in school_map:
+                if re.search(pattern, text):
+                    params["school"] = value
+                    break
+
+        # 农历闰月标志
+        if params.get("lunar_is_leap") is None and re.search(r"闰月|闰(\d{1,2})月", text):
+            params["lunar_is_leap"] = True
 
     def _collect_known_facts(
         self, request: OrchestratorRequest, parsed_params: Dict[str, Any]

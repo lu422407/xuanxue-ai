@@ -33,6 +33,7 @@
 | 18 | 非法农历日期被静默回卷 + 合法农历三十被误拒（排查 #17 时发现，影响**全部** `calendar="lunar"` 输入、三引擎共用路径） | ①`sxtwl.fromLunar` 对不存在的农历日**不报错而是回卷**：实测 `fromLunar(1990, 4, 30)`（该年四月仅 29 天）返回公历 `1990-05-24` 并自称农历 `5/1` —— 用户输入的日期被悄悄换成另一天。②反向缺陷：农历分支复用公历 `datetime` 构造，而合法农历日可能是公历不存在的日期（农历二月三十 `1981-02-30`，公历无 2 月 30 日），此前直接抛 `ValueError` 崩溃。修复：`lunar_to_solar` 加**往返校验**（`fromLunar` 结果再读回农历月/日/闰月比对；已在 1900-2100 共 144,720 个组合验证合法日期含闰月全部往返一致、非法日期全部识别）后抛 `EngineError`；农历字符串解析独立为 `_parse_lunar_datetime_string`，不再经公历 `datetime` 构造。保留农历时间可省略（缺省 12:00）行为 |
 | 19 | `/api/engine/{system}` 不暴露真太阳时/闰月参数（端到端复验发现） | `BirthInput`（`/api/chart`）有 `true_solar_time`/`longitude`，但 `EngineQueryRequest` 缺这两个字段且 `query_engine` 未透传 —— 引擎侧已支持而 API 层**不可达**，用户传了也静默无效（与 chart 端点语义不一致）。修复：补 `true_solar_time` / `longitude` / `lunar_is_leap` 字段并透传 |
 | 20 | 测试间共享限流配额导致隐式耦合 | `default_limiter` 是进程级单例（10 次/60 秒），`tests/api/test_api.py` 各用例共享同一配额：新增用例挤占配额会让**无关用例**意外收到 429（本次新增 4 个用例即触发）。修复：该文件加 `autouse` fixture 每例前后复位限流器（**未修改产品阈值**） |
+| 21 | 编排层丢弃流派 / 校正参数 + `birth_input.birth_datetime` 字符串整体失效（审计同类"静默忽略"缺陷时发现） | ①`_extract_birth_params` 的 `birth_input` 白名单只有 9 个键、`router.build_input` 只产 4 键，导致 `true_solar_time`/`longitude`/`lunar_is_leap`/`bazi_subhour_rule`/`school` **全部被静默丢弃**——实测传 `early_zi` 仍按 `midnight` 起盘、传 `sanhe` 仍按中州派。②设计稿 §3.1 允许 `birth_input` 直接给 `birth_datetime` 字符串，但该写法**整体静默失效**（`build_input` 只认 year/month/day 分量，报"缺少出生日期参数"→ 引擎零调用）。修复：`build_input` 增可选键透传（缺省不写，保持既有 4 键行为与引擎默认值）；编排层白名单补齐 + `user_context` 顶层平铺兼容 + `birth_datetime` 字符串拆分（显式分量优先）；并支持自然语言明确措辞（"用真太阳时，经度91.5度"/"用早子时换日"/"按三合派"）。**防误判**：只认参数化措辞，裸词不认——实测"有没有三合局""想了解飞星是什么""真太阳时是什么"均不再误触发 |
 
 ## 一.5、端到端验收（2026-08-29 首次真实 API 冒烟，Windows 本机）
 
@@ -44,6 +45,7 @@
 ## 二、可解决待做（技术无障碍，按价值排序）
 
 1. **Docker 镜像内编译 ZhouYiLab CLI**（多阶段构建，builder 用 Linux LLVM 镜像）；工程量大，CI 已验证 Linux 可编，配方现成。**自用定位下降为低优先**（本机无 Docker 无法验证，需配 CI docker-build job 才算闭环）。
+2. **提到"风水/太乙神数"会让整个编排静默空转**（2026-09-13 审计时发现，**既有行为**，非本批引入）：`XuanXueRouter.route` 按关键词打分，句中只要出现"风水"就把 `method` 判为风水；而风水/太乙在 `_ENGINE_LOCATIONS` 中模块为 `None`（无引擎），于是 `systems_invoked=[]`，用户拿到的是**只有免责声明和参考条文、没有任何命盘内容**的回答，且无降级提示。对照：同样问句不提"风水"则 `method=unknown`、行为一致但同样无引擎。**待决策**：路由命中无引擎术数时应回落到 `unknown`（附澄清提示），还是给出显式"该术数未接入"降级 —— 两种都会改变既有路由行为，需先定语义。
 2. **非法农历日期被静默回卷**（2026-09-13 排查六壬占时时发现，影响**全部** `calendar="lunar"` 输入）：`sxtwl.fromLunar` 对不存在的农历日**不报错而是回卷**——如 `fromLunar(1990, 4, 30)`（该年四月仅 29 天）返回公历 `1990-05-24` 并自称农历 `5/1`，即用户输入的日期被静默换成另一天。八字/紫微/六壬三引擎共用 `calendar_utils` 解析路径，故均受影响。**修法已验证可行**：`lunar_to_solar` 内加往返校验（`fromLunar` 结果再 `getLunarMonth/Day/isLunarLeap` 比对，合法日期含闰月全部往返一致，非法日期 mismatch）后抛 `EngineError`。**待决策**：改动落在共享历法层（被三引擎依赖），且 `calendar_utils` 属"排盘计算内核"范畴，需用户确认后再做。
 
 ## 三、需要决策（做不做/怎么做取决于产品形态）

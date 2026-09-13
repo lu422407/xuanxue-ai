@@ -381,3 +381,120 @@ def test_text_summary_no_topic_palace_for_general_intent():
     # 不带话题（general）时不应出现话题宫位行
     r = _orch().run({"question": "你好呀，介绍一下命盘", "user_context": {}})
     assert "就你所问的领域" not in r.answer
+
+
+# ---- 编排层流派 / 校正参数透传 ----
+#
+# 同"静默忽略"类缺陷：引擎支持而编排层白名单未含，用户传了也静默无效
+# （实测传 bazi_subhour_rule=early_zi 仍按 midnight 起盘）。
+
+_BIRTH_CTX = {"birth_input": {
+    "birth_datetime": "1990-08-16 14:30:00", "timezone_offset": 8,
+    "calendar": "solar", "gender": "男"}}
+
+# 问题文本需含日期：编排层的 Dispatcher 依赖 build_input 拿到日期分量，
+# 仅给 user_context 而问题里无日期会走"缺少出生日期参数"降级路径。
+_Q = "我是男，1990年8月16日14点30分生，看看事业"
+
+
+def test_orchestrator_accepts_birth_datetime_string():
+    """设计稿 §3.1 允许 birth_input 直接给 birth_datetime 字符串。
+
+    此前该写法整体静默失效（build_input 只认 year/month/day 分量，
+    报"缺少出生日期参数"），属实现缺口。
+    """
+    r = _orch().run({"question": "看看事业", "user_context": _BIRTH_CTX})
+    assert r.systems_invoked == ["bazi", "ziwei"]
+    assert r.systems_skipped == []
+    assert r.engine_results["bazi"]["input_echo"]["birth_datetime"] == "1990-08-16 14:30:00"
+
+
+def test_orchestrator_passes_true_solar_time():
+    """true_solar_time / longitude 必须透传到引擎并真正改变排盘。"""
+    r_base = _orch().run({"question": _Q, "user_context": _BIRTH_CTX})
+    assert r_base.engine_results["bazi"]["input_echo"]["true_solar_time_applied"] is False
+
+    ctx = {"birth_input": {**_BIRTH_CTX["birth_input"],
+                           "true_solar_time": True, "longitude": 91.5}}
+    r = _orch().run({"question": _Q, "user_context": ctx})
+    echo = r.engine_results["bazi"]["input_echo"]
+    assert echo["true_solar_time_applied"] is True
+    assert echo["longitude"] == 91.5
+    # 经度 91.5E ≈ −114 分钟：时柱应随真太阳时改变
+    assert (r.engine_results["bazi"]["pillars"]["hour"]
+            != r_base.engine_results["bazi"]["pillars"]["hour"])
+
+
+def test_orchestrator_passes_subhour_rule():
+    """早晚子时流派必须透传并改变日柱（23:30 边界）。"""
+    base = {"birth_datetime": "1990-08-16 23:30:00", "timezone_offset": 8,
+            "calendar": "solar", "gender": "男"}
+    q = "我是男，1990年8月16日23点30分生，看看事业"
+    r_mid = _orch().run({"question": q, "user_context": {"birth_input": base}})
+    r_early = _orch().run({"question": q,
+                           "user_context": {"birth_input": {**base, "bazi_subhour_rule": "early_zi"}}})
+    assert (r_mid.engine_results["bazi"]["pillars"]["day"]
+            != r_early.engine_results["bazi"]["pillars"]["day"])
+    assert r_early.engine_results["bazi"]["input_echo"]["bazi_subhour_rule"] == "early_zi"
+
+
+def test_orchestrator_passes_school():
+    """紫微流派必须透传（此前传 sanhe 仍按中州派）。"""
+    ctx = {"birth_input": {**_BIRTH_CTX["birth_input"], "school": "sanhe"}}
+    r = _orch().run({"question": _Q, "user_context": ctx})
+    assert r.engine_results["ziwei"]["input_echo"]["school"] == "sanhe"
+
+
+def test_orchestrator_passes_top_level_context_params():
+    """user_context 顶层平铺的同名字段同样应透传。"""
+    r = _orch().run({"question": _Q,
+                     "user_context": {**_BIRTH_CTX,
+                                      "true_solar_time": True, "longitude": 91.5}})
+    assert r.engine_results["bazi"]["input_echo"]["longitude"] == 91.5
+
+
+def test_build_input_passes_optional_params():
+    """router.build_input 必须透传显式给出的可选项，缺省不写（默认行为不变）。"""
+    from src.router import XuanXueRouter
+    router = XuanXueRouter()
+    base = {"year": 1990, "month": 5, "day": 1, "hour": 8, "minute": 30}
+
+    # 缺省：不写可选键，保持既有 4 键行为
+    plain = router.build_input(dict(base))
+    assert set(plain) == {"birth_datetime", "timezone_offset", "calendar", "gender"}
+
+    opts = router.build_input({**base, "true_solar_time": True, "longitude": 91.5,
+                               "bazi_subhour_rule": "early_zi", "school": "sanhe",
+                               "lunar_is_leap": True})
+    assert opts["true_solar_time"] is True
+    assert opts["longitude"] == 91.5
+    assert opts["bazi_subhour_rule"] == "early_zi"
+    assert opts["school"] == "sanhe"
+    assert opts["lunar_is_leap"] is True
+
+
+def test_natural_language_preference_params():
+    """自然语言明确措辞应被识别并生效。"""
+    r = _orch().run({"question": "我是男，1990年8月16日14:30生，请用真太阳时，经度91.5度，看事业",
+                     "user_context": {}})
+    assert r.engine_results["bazi"]["input_echo"]["true_solar_time_applied"] is True
+    assert r.engine_results["bazi"]["input_echo"]["longitude"] == 91.5
+
+    r2 = _orch().run({"question": "我是男，1990年8月16日23:30生，用早子时换日，看事业",
+                      "user_context": {}})
+    assert r2.engine_results["bazi"]["input_echo"]["bazi_subhour_rule"] == "early_zi"
+
+
+@pytest.mark.parametrize("question", [
+    "我是男，1990年5月1日8点30分生，看看事业",
+    "我是男，1990年5月1日8点30分生，我研究风水的",
+    "我是男，1990年5月1日8点30分生，帮我看看有没有三合局",
+    "我是男，1990年5月1日8点30分生，想了解飞星是什么",
+    "我是男，1990年5月1日8点30分生，真太阳时是什么",
+])
+def test_natural_language_no_false_positive(question):
+    """叙述性文字不得被误当成流派/校正参数（裸词不认，只认参数化措辞）。"""
+    params = _orch()._extract_birth_params(
+        type("R", (), {"question": question, "user_context": None})())
+    for key in ("school", "bazi_subhour_rule", "true_solar_time", "longitude"):
+        assert params.get(key) is None, f"{key} 被误判: {params}"
